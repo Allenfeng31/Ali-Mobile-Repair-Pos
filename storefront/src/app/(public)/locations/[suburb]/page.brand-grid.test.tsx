@@ -66,6 +66,15 @@ function expectFeaturedBrandGrid(markup: string) {
   expect(gridMarkup).not.toContain("MacBook Repair");
 }
 
+function getServiceCards(markup: string) {
+  const document = new DOMParser().parseFromString(markup, "text/html");
+  const section = document.querySelector("section.location-service-grid");
+
+  if (!section) throw new Error("Location service-card grid was not rendered.");
+
+  return Array.from(section.querySelectorAll<HTMLAnchorElement>("a.location-service-card"));
+}
+
 describe("Location Page Brand Grid", () => {
   it.each([
     ["nunawading", "Phone & iPhone Repair Near Nunawading | Ali Mobile Ringwood", "Phone & iPhone Repair Near Nunawading"],
@@ -113,6 +122,74 @@ describe("Location Page Brand Grid", () => {
     const document = new DOMParser().parseFromString(markup, "text/html");
 
     expect(document.querySelector('a[href="/repairs/laptop/macbook"]')).not.toBeNull();
+  });
+
+  it.each(["mitcham", "glenwaverley"])("adds one secondary MacBook service card after the existing cards for %s", async (suburb) => {
+    fetchRepairCatalog.mockResolvedValue({ brands: catalogueBrands });
+
+    const markup = renderToStaticMarkup(await LocationPage({ params: Promise.resolve({ suburb }) }));
+    const cards = getServiceCards(markup);
+
+    expect(cards.map((card) => card.getAttribute("href"))).toEqual([
+      "/repairs/phone",
+      "/repairs/tablet",
+      "/repairs/watch",
+      "/repairs/laptop/macbook",
+    ]);
+    expect(cards.filter((card) => card.getAttribute("href") === "/repairs/laptop/macbook")).toHaveLength(1);
+    expect(cards[3]?.textContent).toContain("MacBook Hardware Repair");
+    expect(cards[3]?.textContent).toContain("Screen, battery, keyboard and charging assessment");
+  });
+
+  it.each(["heathmont", "croydon", "nunawading"])("does not add the MacBook service card for non-target suburb %s", async (suburb) => {
+    fetchRepairCatalog.mockResolvedValue({ brands: catalogueBrands });
+
+    const markup = renderToStaticMarkup(await LocationPage({ params: Promise.resolve({ suburb }) }));
+    const cards = getServiceCards(markup);
+
+    expect(cards.map((card) => card.getAttribute("href"))).toEqual([
+      "/repairs/phone",
+      "/repairs/tablet",
+      "/repairs/watch",
+    ]);
+  });
+
+  it("keeps Ringwood's existing service cards unchanged", async () => {
+    fetchRepairCatalog.mockResolvedValue({ brands: catalogueBrands });
+
+    const markup = renderToStaticMarkup(await LocationPage({ params: Promise.resolve({ suburb: "ringwood" }) }));
+    const cards = getServiceCards(markup);
+
+    expect(cards.map((card) => card.getAttribute("href"))).toEqual([
+      "/repairs/phone",
+      "/repairs/phone/iphone",
+      "/repairs/phone/samsung",
+      "/repairs/tablet",
+      "/repairs/watch/apple",
+      "/repairs/laptop/macbook",
+      "/repairs/water-damage",
+    ]);
+  });
+
+  it("keeps the targeted MacBook explanations specific, qualified and Ringwood-based", () => {
+    const mitchamScenario = getServiceAreaBySlug("mitcham")?.customScenarioSection?.paragraphs.join(" ") || "";
+    const glenWaverleyScenario = getServiceAreaBySlug("glenwaverley")?.customScenarioSection?.paragraphs.join(" ") || "";
+
+    for (const scenario of [mitchamScenario, glenWaverleyScenario]) {
+      expect(scenario).toContain("MacBook Air and MacBook Pro");
+      expect(scenario).toMatch(/cracked or failed screens/i);
+      expect(scenario).toMatch(/battery symptoms/i);
+      expect(scenario).toMatch(/keyboard problems/i);
+      expect(scenario).toMatch(/charging issues/i);
+      expect(scenario).toMatch(/model/i);
+      expect(scenario).toMatch(/parts availability/i);
+      expect(scenario).toMatch(/diagnos/i);
+      expect(scenario).toMatch(/quote/i);
+      expect(scenario).toContain("Ringwood Square");
+      expect(scenario).not.toMatch(/general computer|managed IT|networking|software support/i);
+    }
+
+    expect(mitchamScenario).not.toBe(glenWaverleyScenario);
   });
 
   it("keeps the six corrected suburb scenarios phone-first without repeated local repair phrases", () => {

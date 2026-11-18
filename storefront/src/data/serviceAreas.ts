@@ -437,7 +437,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       title: "Phone and device repair assessment near Mitcham",
       paragraphs: [
         "Phone and iPhone repair support remains available for Mitcham customers, alongside Samsung phone assessment, supported Google Pixel models and iPad or tablet faults. The team checks the model, fault and suitable repair scope before any supported work begins.",
-        "Supported MacBook hardware assessment begins with model and fault confirmation before a quote is discussed."
+        "Supported MacBook Air and MacBook Pro hardware assessment may cover cracked or failed screens, battery symptoms, keyboard problems and charging issues. The Ringwood Square repair desk confirms exact model compatibility, parts availability and diagnosis before providing a quote."
       ]
     },
     customFaqs: [
@@ -591,7 +591,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
       title: "Phone and device assessment near Glen Waverley and Syndal",
       paragraphs: [
         "The same Ringwood Square desk also assesses iPhone, Samsung and iPad repairs. Phone support follows the same model, fault, parts and confirmed-quote process rather than a fixed-price or same-day promise.",
-        "Supported MacBook hardware assessment is available through the MacBook repair hub after the exact model and fault are confirmed."
+        "Customers travelling from Glen Waverley or Syndal can bring supported MacBook Air and MacBook Pro hardware faults to Ringwood Square, including cracked or failed screens, battery symptoms, keyboard problems and charging issues. The repair desk checks the exact model, diagnoses the fault and confirms parts availability and the quote before work."
       ]
     },
     customFaqs: [
