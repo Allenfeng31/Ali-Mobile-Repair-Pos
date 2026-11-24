@@ -31,6 +31,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import { getStaffChatStatus, getStaffChatStatusMessage, type StaffChatStatus } from '@/lib/staffChatStatus';
 import { useAdaptivePoll, type PollOutcome } from '@/hooks/useAdaptivePoll';
+import { getQuickQuoteModelLabel, getQuickQuoteSearchResults, type QuickQuoteInventoryItem } from '@/lib/quickQuoteSearch';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -406,51 +407,69 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
   // ── Quick Quote (Cmd+K) State ───────────────────────────────────────────
   const [isQuickSearchOpen, setIsQuickSearchOpen] = React.useState(false);
   const [quickSearchQuery, setQuickSearchQuery] = React.useState('');
-  const [inventoryCache, setInventoryCache] = React.useState<any[]>([]);
+  const [inventoryCache, setInventoryCache] = React.useState<QuickQuoteInventoryItem[]>([]);
   const [inventoryLoading, setInventoryLoading] = React.useState(false);
+  const [isQuickSearchCustomerView, setIsQuickSearchCustomerView] = React.useState(false);
+  const [activeQuickSearchResult, setActiveQuickSearchResult] = React.useState(0);
   const quickSearchInputRef = React.useRef<HTMLInputElement>(null);
+  const quickSearchResultRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
+  const quickSearchPreviousFocusRef = React.useRef<HTMLElement | null>(null);
+
+  const openQuickSearch = React.useCallback(() => {
+    quickSearchPreviousFocusRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    setIsQuickSearchOpen(true);
+  }, []);
+
+  const closeQuickSearch = React.useCallback(() => {
+    setIsQuickSearchOpen(false);
+    setIsQuickSearchCustomerView(false);
+    window.setTimeout(() => quickSearchPreviousFocusRef.current?.focus(), 0);
+  }, []);
 
   // Keyboard shortcut: Cmd+K / Ctrl+K
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        setIsQuickSearchOpen(prev => !prev);
+        if (isQuickSearchOpen) closeQuickSearch();
+        else openQuickSearch();
       }
       if (e.key === 'Escape' && isQuickSearchOpen) {
-        setIsQuickSearchOpen(false);
+        closeQuickSearch();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isQuickSearchOpen]);
+  }, [closeQuickSearch, isQuickSearchOpen, openQuickSearch]);
 
   // Fetch inventory when modal opens (cache it)
   React.useEffect(() => {
     if (isQuickSearchOpen && inventoryCache.length === 0 && !inventoryLoading) {
       setInventoryLoading(true);
       api.getInventory()
-        .then((data: any[]) => setInventoryCache(data))
+        .then((data: QuickQuoteInventoryItem[]) => setInventoryCache(data))
         .catch(console.error)
         .finally(() => setInventoryLoading(false));
     }
     if (isQuickSearchOpen) {
       setQuickSearchQuery('');
+      setIsQuickSearchCustomerView(false);
+      setActiveQuickSearchResult(0);
       setTimeout(() => quickSearchInputRef.current?.focus(), 100);
     }
   }, [isQuickSearchOpen]);
 
-  // Filter results
-  const quickSearchResults = React.useMemo(() => {
-    if (!quickSearchQuery.trim()) return [];
-    const q = quickSearchQuery.toLowerCase();
-    return inventoryCache
-      .filter((item: any) => {
-        const searchable = `${item.name} ${item.model || ''} ${item.brand || ''} ${item.category || ''} ${item.sku || ''}`.toLowerCase();
-        return searchable.includes(q);
-      })
-      .slice(0, 20); // Cap at 20 results
+  const quickSearchResult = React.useMemo(() => {
+    return getQuickQuoteSearchResults(inventoryCache, quickSearchQuery, 40);
   }, [quickSearchQuery, inventoryCache]);
+  const quickSearchResults = quickSearchResult.items;
+
+  React.useEffect(() => {
+    setActiveQuickSearchResult(0);
+    quickSearchResultRefs.current = [];
+  }, [quickSearchQuery]);
 
   // Poll backend server health
   React.useEffect(() => {
@@ -753,7 +772,8 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
           <div className="flex items-center gap-3">
             {/* Quick Quote Search Button */}
             <button
-              onClick={() => setIsQuickSearchOpen(true)}
+              onClick={openQuickSearch}
+              aria-label="Quick Quote"
               className="p-2.5 rounded-2xl bg-neu-bg text-neu-text-secondary shadow-neu-flat hover:text-neu-accent hover:shadow-neu-floating active:scale-[0.98] active:shadow-neu-pressed group relative mr-1 transition-all"
               title="Quick Price Lookup (⌘K)"
             >
@@ -874,14 +894,14 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
       {/* ── Quick Quote Search Modal ──────────────────────────────────── */}
       <AnimatePresence>
         {isQuickSearchOpen && (
-          <div className="fixed inset-0 z-[100] flex justify-center">
+          <div className="fixed inset-0 z-[100] flex justify-center sm:px-5 sm:py-10">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsQuickSearchOpen(false)}
-              className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+              onClick={closeQuickSearch}
+              className="absolute inset-0 bg-slate-950/45 backdrop-blur-sm"
             />
 
             {/* Search Card */}
@@ -890,91 +910,199 @@ export function Layout({ children, currentView, onViewChange, onLogout, currentU
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-2xl mt-20 mx-4 h-fit"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="quick-quote-title"
+              data-customer-view={isQuickSearchCustomerView ? 'true' : 'false'}
+              className="relative z-10 h-[100dvh] w-full sm:h-[min(820px,calc(100dvh-5rem))] sm:max-w-3xl"
             >
-              <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-[2.5rem] p-6 border border-white/20">
+              <div className={cn(
+                "flex h-full min-h-0 flex-col overflow-hidden bg-[var(--color-neu-bg)] shadow-2xl sm:rounded-[2rem] sm:border sm:border-white/30",
+                isQuickSearchCustomerView && "bg-white"
+              )}>
                 {/* Header */}
-                <div className="flex items-center justify-between mb-5">
+                <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200/70 px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:pt-5">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] flex items-center justify-center text-blue-600 border border-white/30">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
                       <Search size={20} strokeWidth={2.5} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-black text-black tracking-tight">Quick Quote</h3>
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Read-Only Price Lookup</p>
+                      <h3 id="quick-quote-title" className="text-lg font-black tracking-tight text-slate-950">Quick Quote</h3>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        {isQuickSearchCustomerView ? 'Customer-safe pricing' : 'Read-only POS lookup'}
+                      </p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setIsQuickSearchOpen(false)}
-                    className="p-2 rounded-xl bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] text-gray-500 hover:text-red-500 active:shadow-[var(--shadow-neu-pressed)] active:scale-95 transition-all"
-                  >
-                    <X size={18} strokeWidth={2.5} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      aria-label={isQuickSearchCustomerView ? 'Exit customer view' : 'Open customer view'}
+                      onClick={() => setIsQuickSearchCustomerView((current) => !current)}
+                      className={cn(
+                        "rounded-xl px-3 py-2 text-[11px] font-black uppercase tracking-wide transition-colors",
+                        isQuickSearchCustomerView
+                          ? "bg-blue-600 text-white hover:bg-blue-700"
+                          : "border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                      )}
+                    >
+                      {isQuickSearchCustomerView ? 'Staff view' : 'Customer view'}
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Close Quick Quote"
+                      onClick={closeQuickSearch}
+                      className="rounded-xl p-2 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600"
+                    >
+                      <X size={20} strokeWidth={2.5} />
+                    </button>
+                  </div>
                 </div>
 
-                {/* Search Input (Recessed) */}
-                <div className="bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] rounded-2xl p-1 mb-4 border border-black/5">
-                  <input
-                    ref={quickSearchInputRef}
-                    type="text"
-                    value={quickSearchQuery}
-                    onChange={(e) => setQuickSearchQuery(e.target.value)}
-                    placeholder="Search device or repair... (Esc to close)"
-                    className="w-full px-5 py-4 bg-transparent text-black font-bold text-base placeholder:text-gray-400 placeholder:font-bold focus:outline-none"
-                  />
-                </div>
-
-                {/* Keyboard hint */}
-                <div className="flex items-center gap-2 mb-4">
-                  <kbd className="px-2 py-0.5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-lg text-[10px] font-black text-gray-500 uppercase tracking-widest border border-white/20">⌘K</kbd>
-                  <span className="text-[10px] font-bold text-gray-400">to toggle</span>
-                  <kbd className="px-2 py-0.5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-flat)] rounded-lg text-[10px] font-black text-gray-500 uppercase tracking-widest border border-white/20 ml-2">ESC</kbd>
-                  <span className="text-[10px] font-bold text-gray-400">to close</span>
+                <div className="shrink-0 border-b border-slate-200/70 px-4 py-3 sm:px-6 sm:py-4">
+                  <div className="flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
+                    <Search size={18} className="shrink-0 text-slate-400" aria-hidden="true" />
+                    <input
+                      ref={quickSearchInputRef}
+                      type="search"
+                      role="searchbox"
+                      aria-label="Search repair prices"
+                      aria-controls="quick-quote-results"
+                      value={quickSearchQuery}
+                      onChange={(e) => setQuickSearchQuery(e.target.value)}
+                      onKeyDown={(event) => {
+                        if ((event.key === 'ArrowDown' || event.key === 'Enter') && quickSearchResults.length > 0) {
+                          event.preventDefault();
+                          setActiveQuickSearchResult(0);
+                          quickSearchResultRefs.current[0]?.focus();
+                        }
+                      }}
+                      placeholder="Try “pixel 7 screen” or a model code"
+                      className="min-w-0 flex-1 bg-transparent py-3.5 text-base font-bold text-slate-950 placeholder:font-semibold placeholder:text-slate-400 focus:outline-none"
+                    />
+                    {quickSearchQuery && (
+                      <button
+                        type="button"
+                        aria-label="Clear search"
+                        onClick={() => {
+                          setQuickSearchQuery('');
+                          quickSearchInputRef.current?.focus();
+                        }}
+                        className="rounded-lg px-2 py-1 text-xs font-black text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <div className="mt-2 hidden items-center justify-between text-[10px] font-bold text-slate-400 sm:flex">
+                    <span>Every word can match model, repair, quality or model code.</span>
+                    <span>↑↓ navigate · Esc close</span>
+                  </div>
                 </div>
 
                 {/* Results */}
-                <div className="max-h-[50vh] overflow-y-auto no-scrollbar">
+                <div id="quick-quote-results" className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6" aria-live="polite">
                   {inventoryLoading ? (
                     <div className="py-12 text-center">
                       <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                       <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Loading Inventory...</p>
                     </div>
                   ) : !quickSearchQuery.trim() ? (
-                    <div className="py-10 text-center">
-                      <Search size={32} className="mx-auto text-gray-300 mb-3" />
-                      <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Type to search prices</p>
-                      <p className="text-[10px] font-bold text-gray-400 mt-1">{inventoryCache.length} items indexed</p>
+                    <div className="mx-auto max-w-sm py-12 text-center sm:py-16">
+                      <Search size={34} className="mx-auto mb-3 text-slate-300" />
+                      <p className="text-sm font-black text-slate-600">Search by brand, model and repair</p>
+                      <p className="mt-1 text-xs font-semibold text-slate-400">{inventoryCache.length} POS items available for read-only lookup</p>
                     </div>
                   ) : quickSearchResults.length === 0 ? (
                     <div className="py-10 text-center">
-                      <p className="text-sm font-black text-gray-400">No results for "{quickSearchQuery}"</p>
-                      <p className="text-[10px] font-bold text-gray-400 mt-1">Try a different search term</p>
+                      <p className="text-sm font-black text-slate-600">No results for “{quickSearchQuery}”</p>
+                      <p className="mt-1 text-xs font-semibold text-slate-400">Check the model number or try fewer words.</p>
                     </div>
                   ) : (
-                    <div className="space-y-1.5">
-                      {quickSearchResults.map((item: any) => (
-                        <div
+                    <div>
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-xs font-black text-slate-600">
+                          {quickSearchResult.totalMatches} {quickSearchResult.totalMatches === 1 ? 'match' : 'matches'}
+                        </p>
+                        {quickSearchResult.usedTypoFallback && (
+                          <p className="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-amber-700">
+                            Showing close spelling matches
+                          </p>
+                        )}
+                      </div>
+                      <div role="listbox" aria-label="Quick Quote results" className="space-y-2.5">
+                      {quickSearchResults.map((item, index) => {
+                        const modelLabel = getQuickQuoteModelLabel(item);
+                        const price = Number.isFinite(Number(item.price)) ? `$${Number(item.price).toFixed(2)}` : 'Quote';
+                        return (
+                        <button
                           key={item.id}
-                          className="flex items-center justify-between px-5 py-3.5 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-sm)] rounded-2xl border border-white/10 hover:shadow-[var(--shadow-neu-flat)] transition-all"
+                          ref={(node) => { quickSearchResultRefs.current[index] = node; }}
+                          type="button"
+                          role="option"
+                          aria-selected={activeQuickSearchResult === index}
+                          tabIndex={activeQuickSearchResult === index ? 0 : -1}
+                          onClick={() => setActiveQuickSearchResult(index)}
+                          onKeyDown={(event) => {
+                            if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+                            event.preventDefault();
+                            const direction = event.key === 'ArrowDown' ? 1 : -1;
+                            const nextIndex = Math.max(0, Math.min(quickSearchResults.length - 1, index + direction));
+                            setActiveQuickSearchResult(nextIndex);
+                            quickSearchResultRefs.current[nextIndex]?.focus();
+                          }}
+                          className={cn(
+                            "grid w-full grid-cols-[minmax(0,1fr)_auto] gap-4 rounded-2xl border px-4 py-4 text-left transition-colors focus:outline-none focus:ring-4 focus:ring-blue-100 sm:px-5",
+                            activeQuickSearchResult === index
+                              ? "border-blue-400 bg-blue-50/70"
+                              : "border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50/30",
+                            isQuickSearchCustomerView && "py-5 sm:py-6"
+                          )}
                         >
-                          <div className="min-w-0 flex-1 mr-4">
-                            <p className="text-sm font-black text-black truncate">{item.name}</p>
-                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">
-                              {item.category}{item.model ? ` · ${item.model}` : ''}{item.quality_grade ? ` · ${item.quality_grade}` : ''}
+                          <div className="min-w-0 break-words">
+                            <p className={cn("font-black leading-snug text-slate-950", isQuickSearchCustomerView ? "text-base sm:text-lg" : "text-sm")}>
+                              {modelLabel}
                             </p>
+                            <p className={cn("mt-1 font-bold leading-snug text-slate-600", isQuickSearchCustomerView ? "text-sm" : "text-xs")}>
+                              {item.name || item.repair_type || item.type || 'Repair price'}
+                            </p>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {item.quality_grade && (
+                                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-700">
+                                  {item.quality_grade}
+                                </span>
+                              )}
+                              {item.variant && (
+                                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-600">
+                                  {item.variant}
+                                </span>
+                              )}
+                            </div>
+                            {!isQuickSearchCustomerView && (
+                              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-bold text-slate-500">
+                                {item.device_model && <span>Model code: {item.device_model}</span>}
+                                {item.sku && <span>{item.sku}</span>}
+                                {item.category && <span>{item.category}</span>}
+                              </div>
+                            )}
                           </div>
-                          <div className="text-right shrink-0">
-                            <p className="text-lg font-black text-blue-600">${item.price?.toFixed(2)}</p>
-                            {item.stock !== undefined && (
-                              <p className={`text-[9px] font-black uppercase tracking-widest ${item.stock > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                                {item.stock > 0 ? `${item.stock} In Stock` : 'Out of Stock'}
+                          <div className="shrink-0 text-right">
+                            <p className={cn("font-black text-blue-700", isQuickSearchCustomerView ? "text-xl sm:text-2xl" : "text-lg")}>{price}</p>
+                            {!isQuickSearchCustomerView && item.stock !== undefined && (
+                              <p className={cn(
+                                "mt-1 text-[10px] font-black uppercase tracking-wide",
+                                item.stock > 0 ? "text-emerald-700" : "text-amber-700"
+                              )}>
+                                {item.stock > 0 ? `${item.stock} in stock` : 'Check availability'}
                               </p>
                             )}
                           </div>
-                        </div>
-                      ))}
-                      {quickSearchResults.length >= 20 && (
-                        <p className="text-center text-[10px] font-bold text-gray-400 py-2">Showing first 20 results. Refine your search for more.</p>
+                        </button>
+                      );})}
+                      </div>
+                      {quickSearchResult.totalMatches > quickSearchResults.length && (
+                        <p className="py-3 text-center text-[10px] font-bold text-slate-400">
+                          Showing the first {quickSearchResults.length} results. Add a model or repair term to narrow the list.
+                        </p>
                       )}
                     </div>
                   )}
