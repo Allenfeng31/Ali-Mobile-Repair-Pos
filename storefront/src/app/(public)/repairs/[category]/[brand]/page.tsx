@@ -940,6 +940,57 @@ const OPPO_SERIES_LABELS: Record<string, string> = {
   other: "Other Oppo Models",
 };
 
+const MOTOROLA_SERIES_ORDER = ["edge", "moto-g", "razr", "moto-e", "other"];
+const MOTOROLA_SERIES_LABELS: Record<string, string> = {
+  edge: "Motorola Edge Series",
+  "moto-g": "Motorola Moto G Series",
+  razr: "Motorola Razr Series",
+  "moto-e": "Motorola Moto E Series",
+  other: "Other Motorola Models",
+};
+
+// Current catalogue models ordered by published generation/release evidence.
+// When a future or ambiguous model is not listed, the stable slug fallback below
+// avoids inventing a release date.
+const MOTOROLA_MODEL_RELEASE_ORDER = [
+  "edge-70-fusion",
+  "edge-70",
+  "edge-60-pro",
+  "edge-60-fusion",
+  "edge-50-neo",
+  "edge-50",
+  "edge-50-fusion",
+  "edge-50-pro",
+  "edge-40",
+  "edge-30-ultra",
+  "edge-30-fusion",
+  "edge-30",
+  "edge-30-pro",
+  "edge-20-fusion",
+  "edge-20-pro",
+  "edge-20",
+  "moto-g06",
+  "moto-g57-5g",
+  "moto-g86-power-5g",
+  "moto-g56-5g",
+  "moto-g15",
+  "moto-g05",
+  "moto-g75-5g",
+  "moto-g55",
+  "moto-g35-5g",
+  "moto-g85-5g",
+  "moto-g24",
+  "moto-g04",
+  "moto-g34-5g",
+  "moto-g84-5g",
+  "moto-g54-5g",
+  "moto-g53-5g",
+  "moto-g50",
+] as const;
+const MOTOROLA_MODEL_RELEASE_RANK = new Map<string, number>(
+  MOTOROLA_MODEL_RELEASE_ORDER.map((slug, index) => [slug, index])
+);
+
 const APPLE_WATCH_SERIES_LABELS: Record<string, string> = {
   "series-3": "Apple Watch Series 3",
   "series-4": "Apple Watch Series 4",
@@ -1029,6 +1080,32 @@ function getOppoSeriesKey(model: ModelEntry) {
   if (name.includes("reno") || slug.includes("reno")) return "reno";
   if (/^a\d+/i.test(name) || /^a\d+/i.test(slug)) return "a";
   return "other";
+}
+
+function getMotorolaSeriesKey(model: ModelEntry) {
+  const name = model.model.toLowerCase();
+  const slug = model.slug.toLowerCase();
+
+  if (slug.startsWith("edge-") || name.includes("edge")) return "edge";
+  if (slug.startsWith("moto-g") || name.includes("moto g")) return "moto-g";
+  if (slug.startsWith("razr") || name.includes("razr")) return "razr";
+  if (slug.startsWith("moto-e") || name.includes("moto e")) return "moto-e";
+  return "other";
+}
+
+function sortMotorolaModels(models: ModelEntry[]) {
+  return [...models].sort((a, b) => {
+    const aRank = MOTOROLA_MODEL_RELEASE_RANK.get(a.slug.toLowerCase());
+    const bRank = MOTOROLA_MODEL_RELEASE_RANK.get(b.slug.toLowerCase());
+
+    if (aRank !== undefined || bRank !== undefined) {
+      if (aRank === undefined) return 1;
+      if (bRank === undefined) return -1;
+      return aRank - bRank;
+    }
+
+    return a.slug.localeCompare(b.slug, "en-AU", { numeric: true });
+  });
 }
 
 function getAppleWatchSeriesKey(model: ModelEntry) {
@@ -1150,15 +1227,19 @@ function buildBrandHubSeriesGroups(categorySlug: string, brandSlug: string, mode
     });
   }
 
-  if (categorySlug !== "phone" || (brandSlug !== "samsung" && brandSlug !== "oppo")) {
+  if (categorySlug !== "phone" || !["samsung", "oppo", "motorola"].includes(brandSlug)) {
     return [];
   }
 
-  const sorted = smartSortModels(models);
+  const sorted = brandSlug === "motorola" ? sortMotorolaModels(models) : smartSortModels(models);
   const groups = new Map<string, ModelEntry[]>();
 
   for (const model of sorted) {
-    const key = brandSlug === "samsung" ? getSamsungSeriesKey(model) : getOppoSeriesKey(model);
+    const key = brandSlug === "samsung"
+      ? getSamsungSeriesKey(model)
+      : brandSlug === "motorola"
+      ? getMotorolaSeriesKey(model)
+      : getOppoSeriesKey(model);
     const current = groups.get(key) ?? [];
     current.push(model);
     groups.set(key, current);
@@ -1171,6 +1252,18 @@ function buildBrandHubSeriesGroups(categorySlug: string, brandSlug: string, mode
       label: SAMSUNG_SERIES_LABELS[key],
       models: toBrandHubSeriesModels(groups.get(key) ?? []),
     }));
+  }
+
+  if (brandSlug === "motorola") {
+    return MOTOROLA_SERIES_ORDER.flatMap((key) => {
+      const groupedModels = groups.get(key);
+      if (!groupedModels || groupedModels.length === 0) return [];
+      return [{
+        key,
+        label: MOTOROLA_SERIES_LABELS[key],
+        models: toBrandHubSeriesModels(groupedModels),
+      }];
+    });
   }
 
   return ["find", "reno", "a", "other"]
@@ -3457,7 +3550,7 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                 </p>
               </div>
             )}
-            {usesBrandHubDesign && (brandSlug === "samsung" || brandSlug === "oppo") ? (
+            {usesBrandHubDesign && (brandSlug === "samsung" || brandSlug === "oppo" || brandSlug === "motorola") ? (
               <BrandHubModelSeriesBrowser
                 brandSlug={brandSlug}
                 categorySlug={categorySlug}

@@ -94,16 +94,29 @@ vi.mock("@/lib/api", () => ({
         category: "phone",
         slug,
         brand,
-        models: [{
-          slug: slug === "motorola" ? "moto-g04" : `${slug}-test-model`,
-          model: slug === "motorola" ? "Moto G04" : `${brand} Test Model`,
-          repairTypes: slug === "motorola"
-            ? [
-                { slug: "screen-replacement", name: "Screen Replacement", price: 129 },
-                { slug: "battery-replacement", name: "Battery Replacement", price: 75 },
-              ]
-            : [{ slug: "screen-replacement", name: "Screen Replacement", price: 0 }],
-        }],
+        models: slug === "motorola"
+          ? [
+              { slug: "moto-g24", model: "Moto G24", repairTypes: [{ slug: "screen-replacement", name: "Screen Replacement", price: 140 }] },
+              { slug: "edge-50-neo", model: "Motorola Edge 50 Neo", repairTypes: [{ slug: "screen-replacement", name: "Screen Replacement", price: 189 }] },
+              { slug: "moto-g-power", model: "Moto G Power", repairTypes: [{ slug: "screen-replacement", name: "Screen Replacement", price: 149 }] },
+              { slug: "edge-70", model: "Motorola Edge 70", repairTypes: [{ slug: "screen-replacement", name: "Screen Replacement", price: 229 }] },
+              { slug: "moto-g85-5g", model: "Moto G85 5G", repairTypes: [{ slug: "screen-replacement", name: "Screen Replacement", price: 179 }] },
+              { slug: "edge-70-fusion", model: "Motorola Edge 70 Fusion", repairTypes: [{ slug: "screen-replacement", name: "Screen Replacement", price: 219 }] },
+              { slug: "moto-g86-power-5g", model: "Moto G86 Power 5G", repairTypes: [{ slug: "screen-replacement", name: "Screen Replacement", price: 199 }] },
+              {
+                slug: "moto-g04",
+                model: "Moto G04",
+                repairTypes: [
+                  { slug: "screen-replacement", name: "Screen Replacement", price: 129 },
+                  { slug: "battery-replacement", name: "Battery Replacement", price: 75 },
+                ],
+              },
+            ]
+          : [{
+              slug: `${slug}-test-model`,
+              model: `${brand} Test Model`,
+              repairTypes: [{ slug: "screen-replacement", name: "Screen Replacement", price: 0 }],
+            }],
       })),
     ],
   }),
@@ -636,6 +649,34 @@ describe("Phone and tablet Brand Hub local service areas", () => {
 
       unmount();
     }
+  });
+
+  it('groups real Motorola families without empty sections and orders each family newest first', async () => {
+    const pageElement = await BrandHubPage({ params: Promise.resolve({ category: 'phone', brand: 'motorola' }) });
+    const { container } = render(pageElement);
+    const series = Array.from(container.querySelectorAll('.brand-hub-series-grid > .brand-hub-series-item'));
+
+    expect(series.map((section) => section.querySelector('strong')?.textContent)).toEqual([
+      'Motorola Edge Series',
+      'Motorola Moto G Series',
+    ]);
+    expect(series[0]?.querySelectorAll('.model-card')).toHaveLength(3);
+    expect(Array.from(series[0]?.querySelectorAll('.model-card') ?? []).map((link) => link.getAttribute('href'))).toEqual([
+      '/repairs/phone/motorola/edge-70-fusion',
+      '/repairs/phone/motorola/edge-70',
+      '/repairs/phone/motorola/edge-50-neo',
+    ]);
+    expect(Array.from(series[1]?.querySelectorAll('.model-card') ?? []).map((link) => link.getAttribute('href'))).toEqual([
+      '/repairs/phone/motorola/moto-g86-power-5g',
+      '/repairs/phone/motorola/moto-g85-5g',
+      '/repairs/phone/motorola/moto-g24',
+      '/repairs/phone/motorola/moto-g04',
+      '/repairs/phone/motorola/moto-g-power',
+    ]);
+    expect(container.querySelectorAll('.brand-hub-model-grid .model-card')).toHaveLength(8);
+    expect(container.textContent).not.toContain('Motorola Razr Series');
+    expect(container.textContent).not.toContain('Motorola Moto E Series');
+    expect(container.textContent).not.toContain('Other Motorola Models');
   });
 
   it.each([
