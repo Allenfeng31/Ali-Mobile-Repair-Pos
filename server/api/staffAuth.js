@@ -60,10 +60,12 @@ function createStaffSessionValidator(supabase, { now = () => Date.now(), ttlMs =
       if (!permissions) return { ok: false, status: 403, code: STAFF_AUTH_CODES.denied, error: 'Staff permission is required.' };
 
       const jwtExpiry = user.exp > 0 ? user.exp * 1000 : Number.POSITIVE_INFINITY;
-      const expiresAt = Math.min(now() + ttlMs, jwtExpiry);
-      if (expiresAt <= now()) return { ok: false, status: 401, code: STAFF_AUTH_CODES.invalid, error: 'Staff session is invalid.' };
-      evictExpired();
-      cache.set(key, { user: { id: user.id }, permissions, expiresAt });
+      if (jwtExpiry <= now()) return { ok: false, status: 401, code: STAFF_AUTH_CODES.invalid, error: 'Staff session is invalid.' };
+      if (ttlMs > 0) {
+        const expiresAt = Math.min(now() + ttlMs, jwtExpiry);
+        evictExpired();
+        cache.set(key, { user: { id: user.id }, permissions, expiresAt });
+      }
       return { ok: true, user: { id: user.id }, permissions, cached: false };
     })();
     inFlight.set(key, work);
@@ -90,4 +92,22 @@ function createRequireStaffAuth(supabase, options) {
   };
 }
 
-module.exports = { STAFF_AUTH_CODES, authFailure, createStaffSessionValidator, createRequireStaffAuth };
+function createRequireSuperAdmin() {
+  return (req, res, next) => {
+    if (req.staffPermissions?.is_super_admin !== true) {
+      return res.status(403).json({
+        error: 'Super Admin permission is required.',
+        code: STAFF_AUTH_CODES.denied,
+      });
+    }
+    return next();
+  };
+}
+
+module.exports = {
+  STAFF_AUTH_CODES,
+  authFailure,
+  createStaffSessionValidator,
+  createRequireStaffAuth,
+  createRequireSuperAdmin,
+};

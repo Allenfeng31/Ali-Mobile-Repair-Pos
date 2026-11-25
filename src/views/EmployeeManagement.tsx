@@ -20,8 +20,20 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { getApiBaseUrl } from '../lib/apiBase';
+import { getStaffAuthHeaders } from '../lib/api';
+import { useAuthStore } from '../hooks/useAuthStore';
 
 const API_BASE = getApiBaseUrl();
+const USERNAME_PATTERN = /^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/;
+
+const readSafeApiError = async (response: Response, fallback: string) => {
+  try {
+    const body = await response.json();
+    return typeof body?.error === 'string' && body.error.trim() ? body.error : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 interface Employee {
   user_id: string;
@@ -40,6 +52,7 @@ interface EmployeeManagementProps {
 }
 
 export function EmployeeManagement({ onBack }: EmployeeManagementProps) {
+  const { permissions: currentPermissions, isLoading: permissionsLoading } = useAuthStore();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -59,13 +72,15 @@ export function EmployeeManagement({ onBack }: EmployeeManagementProps) {
   });
 
   useEffect(() => {
-    fetchEmployees();
-  }, []);
+    if (currentPermissions?.is_super_admin) void fetchEmployees();
+  }, [currentPermissions?.is_super_admin]);
 
   const fetchEmployees = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/admin/employees`);
+      const authHeaders = await getStaffAuthHeaders();
+      const res = await fetch(`${API_BASE}/admin/employees`, { headers: authHeaders });
+      if (!res.ok) throw new Error(await readSafeApiError(res, 'Failed to load employees.'));
       const data = await res.json();
       setEmployees(data);
     } catch (err) {
@@ -96,13 +111,18 @@ export function EmployeeManagement({ onBack }: EmployeeManagementProps) {
 
   const updatePermissionOnServer = async (userId: string, permissions: Partial<Employee>) => {
     try {
-      await fetch(`${API_BASE}/admin/employees/${userId}`, {
+      const authHeaders = await getStaffAuthHeaders();
+      const response = await fetch(`${API_BASE}/admin/employees/${userId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify({ permissions })
       });
+      if (!response.ok) {
+        throw new Error(await readSafeApiError(response, 'Failed to update permission.'));
+      }
     } catch (err) {
       console.error('Failed to update permission:', err);
+      await fetchEmployees();
     }
   };
 
@@ -110,19 +130,26 @@ export function EmployeeManagement({ onBack }: EmployeeManagementProps) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const mappedEmail = newEmail.includes('@') ? newEmail : `${newEmail}@pos.local`;
+      const username = newEmail.trim().toLowerCase();
+      if (username.length < 3 || username.length > 64 || !USERNAME_PATTERN.test(username)) {
+        throw new Error('Username must be 3–64 characters using letters, numbers, dots, underscores or hyphens.');
+      }
+      if (newPassword.length < 6) {
+        throw new Error('Password must be at least 6 characters.');
+      }
+      const authHeaders = await getStaffAuthHeaders();
 
       const res = await fetch(`${API_BASE}/admin/employees`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify({
-          email: mappedEmail,
+          username,
           password: newPassword,
           permissions: newPermissions
         })
       });
 
-      if (!res.ok) throw new Error('Failed to create account');
+      if (!res.ok) throw new Error(await readSafeApiError(res, 'Failed to create account.'));
 
       await fetchEmployees();
       setShowAddModal(false);
@@ -159,6 +186,22 @@ export function EmployeeManagement({ onBack }: EmployeeManagementProps) {
     { key: 'can_delete_customers', label: 'Delete Customers', icon: UsersIcon, color: 'text-indigo-600' },
     { key: 'can_delete_chats', label: 'Delete Chats', icon: MessageCircle, color: 'text-pink-600' },
   ];
+
+  if (permissionsLoading) {
+    return <div className="p-8 text-center font-bold text-gray-500">Checking staff permissions…</div>;
+  }
+
+  if (!currentPermissions?.is_super_admin) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="max-w-md rounded-[2rem] bg-[var(--color-neu-bg)] p-8 text-center shadow-[var(--shadow-neu-pressed)]">
+          <Shield className="mx-auto mb-4 text-red-500" size={48} />
+          <h2 className="mb-2 text-2xl font-black text-black">Access Denied</h2>
+          <p className="font-bold text-gray-500">Super Admin permission is required to manage staff.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col max-w-7xl mx-auto px-4">
@@ -327,6 +370,9 @@ export function EmployeeManagement({ onBack }: EmployeeManagementProps) {
                         value={newEmail}
                         onChange={(e) => setNewEmail(e.target.value)}
                         required
+                        minLength={3}
+                        maxLength={64}
+                        pattern="[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?"
                         placeholder="e.g. admin"
                         className="w-full bg-transparent px-4 py-4 text-sm font-black text-black outline-none placeholder:text-gray-300"
                       />
@@ -341,6 +387,7 @@ export function EmployeeManagement({ onBack }: EmployeeManagementProps) {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         required
+                        minLength={6}
                         placeholder="••••••••"
                         className="w-full bg-transparent px-4 py-4 text-sm font-black text-black outline-none placeholder:text-gray-300"
                       />
