@@ -49,7 +49,7 @@ const handleResponse = async (res: Response) => {
   return data;
 };
 
-const getStaffAuthHeaders = async () => {
+export const getStaffAuthHeaders = async () => {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -279,7 +279,8 @@ export const api = {
 
   // PermissionsFallback
   getPermissions: async (userId: string) => {
-    const res = await fetch(`${API_URL}/admin/permissions/${userId}`);
+    const headers = await getStaffAuthHeaders();
+    const res = await fetch(`${API_URL}/admin/permissions/${userId}`, { headers });
     return handleResponse(res);
   },
 

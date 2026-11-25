@@ -10,6 +10,7 @@ const { callModelWithRetry } = require('../utils/api-utils.js');
 const { isSmsAlertEnabled } = require('./sms-gate.js');
 const { persistGoogleContactSyncTask } = require('./googleContactsSync.js');
 const { createRequireStaffAuth } = require('./staffAuth.js');
+const { createStaffAdminRouter } = require('./staffAdmin.js');
 const { createSyncContactsAdminRouter } = require('./syncContactsAdmin.js');
 const { resolveServerSupabaseKey } = require('../lib/supabaseKeyResolver.js');
 const { notifyStorefrontAnnouncementChange } = require('./announcementRevalidation.js');
@@ -589,98 +590,7 @@ app.post('/api/login', async (req, res) => {
 // ----------------------------------------------------------------------
 // ADMIN & RBAC
 // ----------------------------------------------------------------------
-app.get('/api/admin/employees', async (req, res) => {
-  try {
-    // Note: Fetching from auth.users might be restricted depending on Supabase version/config
-    // even with service_role. If this doesn't work, we'd need to use a profiles table.
-    const { data: perms, error: permsError } = await supabase
-      .from('employee_permissions')
-      .select('*');
-
-    if (permsError) throw permsError;
-
-    // Get auth emails for these users
-    const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
-    if (authError) throw authError;
-
-    const combined = perms.map(p => {
-      const authUser = authUsers.find(u => u.id === p.user_id);
-      return {
-        ...p,
-        email: authUser?.email || 'Unknown User'
-      };
-    });
-
-    res.json(combined);
-  } catch (error) {
-    console.error('Error fetching employees:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.get('/api/admin/permissions/:userId', async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('employee_permissions')
-      .select('*')
-      .eq('user_id', req.params.userId)
-      .maybeSingle();
-
-    if (error) throw error;
-    res.json(data || null);
-  } catch (error) {
-    console.error('Error fetching user permissions:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.post('/api/admin/employees', async (req, res) => {
-  const { email, password, permissions } = req.body;
-
-  try {
-    // 1. Create user in Supabase Auth
-    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true
-    });
-
-    if (authError) throw authError;
-
-    // 2. Update permissions
-    // The trigger on_auth_user_created should have created the row.
-    // We update it with the specific permissions provided.
-    const { error: permError } = await supabase
-      .from('employee_permissions')
-      .update(permissions)
-      .eq('user_id', authUser.user.id);
-
-    if (permError) throw permError;
-
-    res.json({ success: true, user: authUser.user });
-  } catch (error) {
-    console.error('Error creating employee:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.put('/api/admin/employees/:userId', async (req, res) => {
-  const { userId } = req.params;
-  const { permissions } = req.body;
-
-  try {
-    const { data, error } = await supabase
-      .from('employee_permissions')
-      .update(permissions)
-      .eq('user_id', userId)
-      .select();
-
-    if (error) throw error;
-    res.json(data[0]);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+app.use('/api/admin', createStaffAdminRouter(supabase));
 
 // ----------------------------------------------------------------------
 // INVENTORY
