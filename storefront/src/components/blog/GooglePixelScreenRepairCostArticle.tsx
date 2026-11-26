@@ -123,7 +123,7 @@ const faqs = [
   },
   {
     question: "Will a Pixel screen replacement erase my data?",
-    answer: "A normal screen replacement does not intentionally erase customer data, but damaged devices can carry existing data risk. Back up important information before repair whenever the screen condition allows it.",
+    answer: <>A normal screen replacement does not intentionally erase customer data, but damaged devices can carry existing data risk. <strong>Back up important information</strong> before repair whenever the screen condition allows it.</>,
   },
   {
     question: "Can only the cracked Pixel glass be replaced?",
@@ -135,11 +135,11 @@ const faqs = [
   },
   {
     question: "Will the replacement screen quality be the same?",
-    answer: "The available part depends on the model and the POS grade shown in the table. Genuine, Premium and Standard are catalogue labels; we confirm the specific option before repair rather than promising identical specifications from the label alone.",
+    answer: <>Ali Mobile offers <strong>genuine parts for supported Pixel models</strong>. We confirm model compatibility and parts availability before repair. A different POS catalogue grade is not represented as Genuine.</>,
   },
   {
     question: "Will my Pixel still be water-resistant after repair?",
-    answer: "No factory IP rating is promised after the phone has been opened. Adhesive is handled during reassembly, but screen replacement does not restore the factory IP rating, so avoid intentional water exposure.",
+    answer: <>No factory IP rating is promised after the phone has been opened. Adhesive is handled during reassembly, but screen replacement <strong>does not restore the factory IP rating</strong>, so avoid intentional water exposure.</>,
   },
   {
     question: "Is Google Pixel screen repair worth it?",
@@ -147,7 +147,7 @@ const faqs = [
   },
   {
     question: "What warranty applies to an eligible Pixel screen repair?",
-    answer: "Eligible completed screen repairs include a 6-month warranty on the fitted part and workmanship. New impact, bending, liquid damage, misuse, third-party work and unrelated faults are excluded, and Australian Consumer Law rights are not limited.",
+    answer: <>Eligible completed screen repairs include a <strong>6-month warranty on the fitted part and workmanship</strong>. New impact, bending, liquid damage, misuse, third-party work and unrelated faults are excluded, and Australian Consumer Law rights are not limited.</>,
   },
 ] as const;
 
@@ -193,7 +193,7 @@ export function GooglePixelScreenRepairCostArticle({
 
       <section className={styles.wideSection} aria-labelledby="pixel-price-table">
         <h2 id="pixel-price-table">Current Google Pixel screen replacement prices</h2>
-        <p>Prices are grouped by the exact quality-grade name published for each model. Multiple options remain separate if the catalogue lists more than one.</p>
+        <p><strong>Current repair prices</strong> retain the exact POS catalogue grade published for each model. A grade is never renamed, and multiple catalogue entries remain separate.</p>
         {priceTable && priceTable.rows.length > 0 ? (
           <>
             {currentRows.length > 0 && <PriceTable rows={currentRows} label="Current Google Pixel 7 and newer screen replacement prices" />}
@@ -221,42 +221,57 @@ export function GooglePixelScreenRepairCostArticle({
       <section className={styles.readingSection} aria-labelledby="pixel-price-factors">
         <h2 id="pixel-price-factors">Why do Google Pixel screen repair prices vary?</h2>
         <h3>Model and display assembly</h3>
-        <p>Pixel generations, Pro and XL variants, a-series models and foldables do not all use the same display assembly. The exact model must be identified before the part or price is confirmed.</p>
+        <p>Pixel generations, Pro and XL variants, a-series models and foldables do not all use the same display assembly. <strong>The exact model must be identified</strong> before the part or price is confirmed.</p>
         <h3>Frame and impact damage</h3>
-        <p>A bent edge, damaged housing or trapped debris can stop a replacement screen from sitting safely. Black screens, lines and failed touch can also overlap with connector, liquid or board faults, so visible symptoms alone do not prove that a display assembly is the only repair required.</p>
+        <p><strong>Frame and impact damage can change the repair path.</strong> A bent edge, damaged housing or trapped debris can stop a replacement screen from sitting safely. Black screens, lines and failed touch can also overlap with connector, liquid or board faults.</p>
         <h3>Part option and availability</h3>
-        <p>The displayed option comes from the current catalogue for that model. Availability and the approved part scope are confirmed before work begins.</p>
+        <p>The displayed option comes from the current catalogue for that model. <strong>Parts availability and the approved repair scope</strong> are confirmed before work begins.</p>
       </section>
 
       <section className={styles.readingSection} aria-labelledby="pixel-screen-options">
-        <h2 id="pixel-screen-options">Available Google Pixel screen options</h2>
-        <p><strong>Genuine, Premium and Standard are the quality-grade names</strong> currently present in the POS catalogue. A label is shown only where it exists for a specific model.</p>
-        <p>Those labels do not, by themselves, guarantee a fixed OLED technology, brightness, refresh rate, frame inclusion or service life. We explain the actual available part for the phone before the repair is approved.</p>
+        <h2 id="pixel-screen-options">Genuine Google Pixel replacement parts</h2>
+        <p>For supported models, Ali Mobile offers <strong>genuine Google Pixel screen replacement parts</strong> to help maintain the original display experience. We confirm exact model compatibility and <strong>parts availability</strong> before repair.</p>
+        <p>The live table retains the original POS catalogue grade and price for accuracy. <strong>A different catalogue grade is never relabelled as Genuine</strong>, and its price is not used as a Genuine quote.</p>
       </section>
 
       <section className={styles.readingSection} aria-labelledby="pixel-screen-problems">
         <h2 id="pixel-screen-problems">Common Google Pixel screen problems</h2>
-        <ul>
-          <li><strong>Cracked glass:</strong> sharp edges and spreading cracks can make the phone unsafe to handle even while the image still works.</li>
-          <li><strong>Black display:</strong> a Pixel may still ring or vibrate when the display assembly has failed, but power and board faults must also be ruled out.</li>
-          <li><strong>Green or coloured lines:</strong> line damage can indicate failure within the display layer rather than only the outer glass.</li>
-          <li><strong>Flicker, black spots or ink-like marks:</strong> these symptoms can follow pressure or impact damage and may worsen.</li>
-          <li><strong>Touch not responding:</strong> dead areas or ghost touches can involve the touch layer, a connection or other impact damage.</li>
-        </ul>
+        <div className={styles.problemLayout}>
+          <ul>
+            <li><strong>Cracked glass:</strong> sharp edges and spreading cracks can make the phone unsafe to handle even while the image still works.</li>
+            <li><strong>Black display:</strong> a Pixel may still ring or vibrate when the display assembly has failed, but power and board faults must also be ruled out.</li>
+            <li><strong>Green or coloured lines:</strong> line damage can indicate failure within the display layer rather than only the outer glass.</li>
+            <li><strong>Flicker, black spots or ink-like marks:</strong> these symptoms can follow pressure or impact damage and may worsen.</li>
+            <li><strong>Touch not responding:</strong> dead areas or ghost touches can involve the touch layer, a connection or other impact damage.</li>
+          </ul>
+          <figure className={styles.problemImage}>
+            <Image
+              src="/images/blog/google-pixel-screen-repair-cost/pixel-screen-damage-repair-tools.webp"
+              alt="Illustrative cracked phone screen beside professional repair tools"
+              width={1122}
+              height={1402}
+              sizes="(max-width: 768px) 100vw, 34vw"
+            />
+            <figcaption>Illustrative image: screen and display damage can require more than an outer-glass repair.</figcaption>
+          </figure>
+        </div>
         <p>For safe checks before assuming the screen is the only fault, read <Link href="/blog/phone-screen-black-but-still-on" prefetch={false}>why a phone screen can stay black while the phone is still on</Link>.</p>
       </section>
 
       <section className={`${styles.readingSection} ${styles.calibrationFeature}`} aria-labelledby="pixel-fingerprint">
         <div className={styles.calibrationContent}>
           <h2 id="pixel-fingerprint">Genuine Google Pixel Screen Replacement &amp; Fingerprint Calibration</h2>
-          <p>At Ali Mobile &amp; Repair, we offer genuine screen replacement parts for supported Google Pixel models, helping maintain the original display experience.</p>
-          <p>For compatible models with an under-display fingerprint sensor, we use Google&apos;s official fingerprint calibration software when required after screen replacement.</p>
-          <p>We also carry out post-repair checks, including display quality, touch response and fingerprint sensor functionality. Where necessary, customers can verify fingerprint enrolment and unlocking before collecting their devices.</p>
+          <h3>Genuine replacement parts</h3>
+          <p>At Ali Mobile &amp; Repair, we offer <strong>genuine screen replacement parts</strong> for supported Google Pixel models, helping maintain the original display experience.</p>
+          <h3>Google fingerprint calibration</h3>
+          <p>For compatible models with an under-display fingerprint sensor, we use <strong>Google&apos;s official fingerprint calibration software</strong> when required after screen replacement.</p>
+          <h3>Post-repair function testing</h3>
+          <p>We also carry out post-repair checks, including display quality and touch response, and <strong>test the fingerprint sensor</strong> where applicable. Customers can verify fingerprint enrolment and unlocking before collecting their devices when necessary.</p>
           <p>Our goal is to replace the damaged screen and confirm that the repaired device&apos;s key functions have been properly checked.</p>
           <p>Pixel 6 and later non-folding models use an under-display fingerprint path, while Fold models use a side-mounted sensor arrangement. These are different repair and testing paths.</p>
           <p>Google provides an official <a href="https://pixelrepair.withgoogle.com/" target="_blank" rel="noreferrer">Pixel Update and Software Repair tool</a> with a fingerprint calibration option, plus the <a href="https://support.google.com/pixelphone/answer/14257407?hl=en-AU" target="_blank" rel="noreferrer">Pixel Repair Diagnostics App</a>.</p>
-          <p>Supported phones can also use <a href="https://support.google.com/pixelphone/answer/14266732?hl=en-AU" target="_blank" rel="noreferrer">Pixel Repair Mode</a> to limit access to personal data during service. Back up important data first and do not share the normal lock-screen PIN.</p>
-          <p>All repairs are subject to model compatibility, parts availability and our applicable 6-month repair warranty.</p>
+          <p>Supported phones can also use <a href="https://support.google.com/pixelphone/answer/14266732?hl=en-AU" target="_blank" rel="noreferrer">Pixel Repair Mode</a> to limit access to personal data during service. <strong>Back up important data</strong> first and do not share the normal lock-screen PIN.</p>
+          <p>All repairs are subject to model compatibility, <strong>parts availability</strong> and our applicable <strong>6-month repair warranty</strong>.</p>
         </div>
       </section>
 
@@ -288,18 +303,18 @@ export function GooglePixelScreenRepairCostArticle({
       <section className={styles.readingSection} aria-labelledby="pixel-repair-process">
         <h2 id="pixel-repair-process">Repair process, timing and warranty</h2>
         <ol>
-          <li>Confirm the exact Pixel model and inspect the display, touch response and frame.</li>
-          <li>Explain the available screen option, fixed price or quote requirements before work begins.</li>
-          <li>Replace the supported display assembly and handle the frame adhesive carefully.</li>
-          <li>Test the image, touch, charging, cameras and fingerprint function where applicable.</li>
+          <li><strong>Confirm the model:</strong> inspect the display, touch response and frame.</li>
+          <li><strong>Confirm the price:</strong> explain the available screen option, fixed price or quote requirements before work begins.</li>
+          <li><strong>Replace the display:</strong> fit the supported assembly and handle the frame adhesive carefully.</li>
+          <li><strong>Test key functions:</strong> check the image, touch, charging, cameras and fingerprint function where applicable.</li>
         </ol>
-        <p>Repair timing is confirmed after the model, required part and damage are checked. A normal screen replacement does not intentionally erase data, but back up important information beforehand whenever possible.</p>
-        <p>Eligible completed screen repairs include a <strong>6-month warranty on the fitted part and workmanship</strong>. New impact, bending, liquid damage, misuse, third-party work and unrelated faults are excluded. Opening and resealing a Pixel does not restore the factory IP rating, so intentional water exposure should be avoided after repair.</p>
+        <p>Repair timing is confirmed after the model, required part and damage are checked. A normal screen replacement does not intentionally erase data, but <strong>back up important information</strong> beforehand whenever possible.</p>
+        <p>Eligible completed screen repairs include a <strong>6-month warranty on the fitted part and workmanship</strong>. New impact, bending, liquid damage, misuse, third-party work and unrelated faults are excluded. Opening and resealing a Pixel <strong>does not restore the factory IP rating</strong>, so intentional water exposure should be avoided after repair.</p>
       </section>
 
       <section className={styles.readingSection} aria-labelledby="pixel-repair-value">
         <h2 id="pixel-repair-value">Is Google Pixel screen repair worth it?</h2>
-        <p>Compare the confirmed repair cost with the phone&apos;s overall condition, battery health, other damage, remaining value and expected use. Repair can make sense when the phone is otherwise reliable and its data or setup matters to you. If it has several major faults or a badly distorted frame, replacement may be more practical.</p>
+        <p>Compare the <strong>confirmed repair cost</strong> with the phone&apos;s overall condition, battery health, other damage, remaining value and expected use. Repair can make sense when the phone is otherwise reliable and its data or setup matters to you. If it has several major faults or a badly distorted frame, <strong>replacement may be more practical</strong>.</p>
       </section>
 
       <section className={styles.readingSection} aria-labelledby="pixel-faq">

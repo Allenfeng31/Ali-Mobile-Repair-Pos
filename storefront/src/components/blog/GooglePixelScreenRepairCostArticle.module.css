@@ -1,14 +1,17 @@
 .article {
   color: var(--foreground);
+  font-size: clamp(1rem, 1.1vw, 1.08rem);
+  font-weight: 500;
+  line-height: 1.76;
 }
 
-.article section + section {
-  margin-top: 2.75rem;
+.article > section + section {
+  margin-top: clamp(3rem, 5vw, 4rem);
 }
 
 .readingSection,
 .guideNav {
-  width: min(100%, 820px);
+  width: min(100%, 760px);
   margin-inline: auto;
 }
 
@@ -16,27 +19,70 @@
   width: 100%;
 }
 
+.wideSection > h2,
+.wideSection > p {
+  width: min(100%, 760px);
+  margin-inline: auto;
+}
+
 .article h2 {
-  margin: 0 0 1rem;
+  margin: 0 0 1.15rem;
+  color: var(--foreground);
+  font-size: clamp(1.6rem, 2.5vw, 2rem);
+  font-weight: 850;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 .article h3 {
-  margin: 1.5rem 0 0.5rem;
+  margin: 1.8rem 0 0.55rem;
+  color: var(--foreground);
+  font-size: clamp(1.12rem, 1.5vw, 1.3rem);
+  font-weight: 750;
+  line-height: 1.3;
 }
 
-.article p,
-.article li {
+.article p {
+  margin: 0 0 1.15rem;
   color: var(--foreground);
-  line-height: 1.72;
+  line-height: 1.76;
+}
+
+.article li {
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+  line-height: 1.68;
 }
 
 .article ul,
 .article ol {
+  margin: 0 0 1.25rem;
   padding-left: 1.35rem;
 }
 
+.article li::marker {
+  color: var(--primary);
+  font-weight: 750;
+}
+
+.article strong {
+  color: var(--foreground);
+  font-weight: 800;
+}
+
 .article a {
+  color: var(--primary);
+  font-weight: 700;
   overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+.article a:hover {
+  color: color-mix(in srgb, var(--primary) 78%, var(--foreground));
+  text-decoration-thickness: 0.12em;
 }
 
 .guideNav {
@@ -48,7 +94,9 @@
 }
 
 .guideNav h2 {
+  margin-bottom: 0.75rem;
   font-size: 1rem;
+  letter-spacing: 0;
 }
 
 .guideNav nav {
@@ -59,16 +107,13 @@
 }
 
 .guideNav a,
-.modelLink,
-.article p a {
-  color: var(--primary);
+.modelLink {
   font-weight: 700;
-  text-underline-offset: 0.18em;
 }
 
 .guideNav a:focus-visible,
 .modelLink:focus-visible,
-.article p a:focus-visible,
+.article a:focus-visible,
 .bookingPanel a:focus-visible {
   border-radius: 0.2rem;
   outline: 2px solid var(--primary);
@@ -77,6 +122,7 @@
 
 .answerLead {
   font-size: clamp(1.08rem, 1.5vw, 1.24rem);
+  line-height: 1.65;
 }
 
 .calibrationFeature {
@@ -101,6 +147,7 @@
   background-position: 82% center;
   background-size: auto 100%;
   content: "";
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 24%);
   mask-image: linear-gradient(to right, transparent 0%, #000 24%);
 }
 
@@ -111,6 +158,7 @@
   border: 1px solid color-mix(in srgb, var(--layer-border) 80%, transparent);
   border-radius: 0.75rem;
   background: color-mix(in srgb, var(--background) 94%, transparent);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
@@ -118,8 +166,47 @@
   text-wrap: balance;
 }
 
+.calibrationContent h3 {
+  margin-top: 1.4rem;
+}
+
 .calibrationContent p:last-child {
   margin-bottom: 0;
+}
+
+.problemLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(15rem, 0.75fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.problemLayout ul {
+  margin-bottom: 0;
+}
+
+.problemImage {
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid var(--layer-border);
+  border-radius: 0.75rem;
+  background: var(--secondary);
+}
+
+.problemImage img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.problemImage figcaption {
+  padding: 0.75rem 0.9rem;
+  color: var(--muted-foreground);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
 .tableFrame {
@@ -136,6 +223,7 @@
 
 .priceTable caption {
   padding: 1rem 1.25rem;
+  color: var(--foreground);
   text-align: left;
   font-weight: 750;
 }
@@ -150,6 +238,8 @@
 
 .priceTable thead th {
   background: var(--secondary);
+  color: var(--foreground);
+  font-weight: 800;
 }
 
 .priceCell {
@@ -260,19 +350,41 @@
 }
 
 .faqList details {
-  padding: 1.25rem;
+  overflow: hidden;
   border: 1px solid var(--layer-border);
   border-radius: 0.75rem;
-  text-align: center;
+  background: var(--background);
+  text-align: left;
 }
 
 .faqList summary {
+  min-height: 2.75rem;
+  padding: 1rem 1.15rem;
+  color: var(--foreground);
   cursor: pointer;
-  font-weight: 750;
+  font-size: 1.03rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.faqList summary:hover {
+  background: var(--secondary);
+}
+
+.faqList summary:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: -3px;
+}
+
+.faqList details[open] summary {
+  border-bottom: 1px solid var(--layer-border);
+  background: var(--secondary);
 }
 
 .faqList p {
-  margin: 0.75rem 0 0;
+  margin: 0;
+  padding: 1rem 1.15rem 1.15rem;
+  line-height: 1.72;
 }
 
 .bookingPanel {
@@ -298,8 +410,14 @@
 }
 
 @media (max-width: 768px) {
+  .problemLayout,
   .photoPair {
     grid-template-columns: 1fr;
+  }
+
+  .problemImage {
+    width: min(100%, 28rem);
+    margin-inline: auto;
   }
 
   .calibrationFeature {
@@ -313,6 +431,7 @@
     height: 16.5rem;
     background-position: 82% center;
     background-size: auto 152%;
+    -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
   }
 
@@ -323,9 +442,29 @@
   }
 }
 
+@media (min-width: 641px) and (max-width: 768px) {
+  .calibrationFeature::before {
+    background-position: 95% center;
+    background-size: auto 300%;
+  }
+}
+
 @media (max-width: 640px) {
-  .article section + section {
-    margin-top: 2.25rem;
+  .article > section + section {
+    margin-top: 2.75rem;
+  }
+
+  .article h2 {
+    font-size: clamp(1.45rem, 7vw, 1.75rem);
+  }
+
+  .article h3 {
+    font-size: clamp(1.08rem, 5vw, 1.2rem);
+  }
+
+  .article p,
+  .article li {
+    line-height: 1.68;
   }
 
   .tableFrame {

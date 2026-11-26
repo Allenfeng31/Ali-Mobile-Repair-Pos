@@ -61,6 +61,9 @@ describe("Google Pixel screen repair cost article", () => {
 
   it("uses the approved internal links and bounded Pixel-specific guidance", () => {
     const html = renderArticle();
+    const document = new DOMParser().parseFromString(html, "text/html");
+    const emphasizedText = Array.from(document.querySelectorAll("strong"))
+      .map((element) => element.textContent);
 
     [
       "/repairs/phone/google-pixel",
@@ -71,14 +74,36 @@ describe("Google Pixel screen repair cost article", () => {
       "https://support.google.com/pixelphone/answer/14257407?hl=en-AU",
       "https://support.google.com/pixelphone/answer/14266732?hl=en-AU",
     ].forEach((href) => expect(html).toContain(`href="${href}"`));
-    expect(html).toContain("Genuine, Premium and Standard are the quality-grade names");
+    expect(html).toContain("Genuine Google Pixel replacement parts");
+    expect(html).not.toContain("Genuine, Premium and Standard are the quality-grade names");
+    expect(html).toContain("A different catalogue grade is never relabelled as Genuine");
     expect(html).toContain("Genuine Google Pixel Screen Replacement &amp; Fingerprint Calibration");
-    expect(html).toContain("we offer genuine screen replacement parts for supported Google Pixel models");
-    expect(html).toContain("Google&#x27;s official fingerprint calibration software when required");
-    expect(html).toContain("customers can verify fingerprint enrolment and unlocking before collecting their devices");
+    expect(document.body.textContent).toContain("we offer genuine screen replacement parts for supported Google Pixel models");
+    expect(document.body.textContent).toContain("Google's official fingerprint calibration software when required");
+    expect(document.body.textContent).toContain("Customers can verify fingerprint enrolment and unlocking before collecting their devices");
     expect(html).toContain("does not restore the factory IP rating");
     expect(html).toContain("6-month warranty on the fitted part and workmanship");
+    expect(emphasizedText).toEqual(expect.arrayContaining([
+      "genuine screen replacement parts",
+      "Google's official fingerprint calibration software",
+      "test the fingerprint sensor",
+      "Back up important data",
+      "does not restore the factory IP rating",
+    ]));
     expect(html).not.toMatch(/same-day service|30.?60 minutes|premium AMOLED/i);
+  });
+
+  it("uses semantic heading levels and a clearly labelled supporting illustration", () => {
+    const html = renderArticle();
+    const document = new DOMParser().parseFromString(html, "text/html");
+
+    expect(document.querySelectorAll("h1")).toHaveLength(0);
+    expect(document.querySelectorAll("h2").length).toBeGreaterThan(8);
+    expect(document.querySelectorAll("h3").length).toBeGreaterThan(4);
+    expect(document.querySelector("#pixel-screen-options")?.textContent).toBe("Genuine Google Pixel replacement parts");
+    expect(document.querySelector("#pixel-fingerprint + h3")?.textContent).toBe("Genuine replacement parts");
+    expect(document.querySelector('img[alt="Illustrative cracked phone screen beside professional repair tools"]')).not.toBeNull();
+    expect(html).toContain("Illustrative image: screen and display damage can require more than an outer-glass repair.");
   });
 
   it("renders two verified public Pixel repair results without exposing customer content", () => {
@@ -119,6 +144,17 @@ describe("Google Pixel screen repair cost article", () => {
     expect(styles).toContain("overflow-wrap: anywhere");
   });
 
+  it("defines an explicit readable type hierarchy and accessible FAQ states", () => {
+    expect(styles).toMatch(/\.article h2\s*{[\s\S]*?font-size:\s*clamp\(/);
+    expect(styles).toMatch(/\.article h2\s*{[\s\S]*?font-weight:\s*(800|850|900)/);
+    expect(styles).toMatch(/\.article h3\s*{[\s\S]*?font-size:\s*clamp\(/);
+    expect(styles).toMatch(/\.article h3\s*{[\s\S]*?font-weight:\s*(700|750|800)/);
+    expect(styles).toMatch(/\.readingSection[\s\S]*?760px/);
+    expect(styles).toMatch(/\.faqList summary\s*{[\s\S]*?min-height:\s*(2\.75rem|44px)/);
+    expect(styles).toContain(".faqList summary:focus-visible");
+    expect(styles).toContain(".article a:hover");
+  });
+
   it("uses the supplied Pixel artwork as a cropped decorative calibration background", () => {
     expect(styles).toContain("google-pixel-screen-repair-guide-background.webp");
     expect(styles).toContain(".calibrationFeature::before");
@@ -126,6 +162,13 @@ describe("Google Pixel screen repair cost article", () => {
     expect(existsSync(resolve(
       process.cwd(),
       "public/images/blog/google-pixel-screen-repair-cost/google-pixel-screen-repair-guide-background.webp",
+    ))).toBe(true);
+  });
+
+  it("uses the supplied broken-screen artwork as an optimized supporting image", () => {
+    expect(existsSync(resolve(
+      process.cwd(),
+      "public/images/blog/google-pixel-screen-repair-cost/pixel-screen-damage-repair-tools.webp",
     ))).toBe(true);
   });
 });
