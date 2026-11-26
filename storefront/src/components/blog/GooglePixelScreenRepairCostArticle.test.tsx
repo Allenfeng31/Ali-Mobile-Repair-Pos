@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -72,6 +72,10 @@ describe("Google Pixel screen repair cost article", () => {
       "https://support.google.com/pixelphone/answer/14266732?hl=en-AU",
     ].forEach((href) => expect(html).toContain(`href="${href}"`));
     expect(html).toContain("Genuine, Premium and Standard are the quality-grade names");
+    expect(html).toContain("Genuine Google Pixel Screen Replacement &amp; Fingerprint Calibration");
+    expect(html).toContain("we offer genuine screen replacement parts for supported Google Pixel models");
+    expect(html).toContain("Google&#x27;s official fingerprint calibration software when required");
+    expect(html).toContain("customers can verify fingerprint enrolment and unlocking before collecting their devices");
     expect(html).toContain("does not restore the factory IP rating");
     expect(html).toContain("6-month warranty on the fitted part and workmanship");
     expect(html).not.toMatch(/same-day service|30.?60 minutes|premium AMOLED/i);
@@ -113,5 +117,15 @@ describe("Google Pixel screen repair cost article", () => {
     expect(styles).toMatch(/@media \(max-width: 768px\)[\s\S]*?\.photoPair\s*{[\s\S]*?grid-template-columns:\s*1fr/);
     expect(styles).not.toMatch(/min-width:\s*(610|680)px/);
     expect(styles).toContain("overflow-wrap: anywhere");
+  });
+
+  it("uses the supplied Pixel artwork as a cropped decorative calibration background", () => {
+    expect(styles).toContain("google-pixel-screen-repair-guide-background.webp");
+    expect(styles).toContain(".calibrationFeature::before");
+    expect(styles).toMatch(/background-position:\s*82% center/);
+    expect(existsSync(resolve(
+      process.cwd(),
+      "public/images/blog/google-pixel-screen-repair-cost/google-pixel-screen-repair-guide-background.webp",
+    ))).toBe(true);
   });
 });

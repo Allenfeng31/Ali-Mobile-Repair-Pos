@@ -246,11 +246,18 @@ export function GooglePixelScreenRepairCostArticle({
         <p>For safe checks before assuming the screen is the only fault, read <Link href="/blog/phone-screen-black-but-still-on" prefetch={false}>why a phone screen can stay black while the phone is still on</Link>.</p>
       </section>
 
-      <section className={styles.readingSection} aria-labelledby="pixel-fingerprint">
-        <h2 id="pixel-fingerprint">Fingerprint sensor after Pixel screen replacement</h2>
-        <p>Pixel 6 and later non-folding models use an under-display fingerprint path, while Fold models use a side-mounted sensor arrangement. These should not be described as the same repair or calibration process.</p>
-        <p>Where applicable, display work may require fingerprint adjustment or calibration followed by functional testing. Google provides an official <a href="https://pixelrepair.withgoogle.com/" target="_blank" rel="noreferrer">Pixel Update and Software Repair tool</a> with a fingerprint calibration option, plus the <a href="https://support.google.com/pixelphone/answer/14257407?hl=en-AU" target="_blank" rel="noreferrer">Pixel Repair Diagnostics App</a>.</p>
-        <p>Supported phones can also use <a href="https://support.google.com/pixelphone/answer/14266732?hl=en-AU" target="_blank" rel="noreferrer">Pixel Repair Mode</a> to limit access to personal data during service. Back up important data first and do not share the normal lock-screen PIN.</p>
+      <section className={`${styles.readingSection} ${styles.calibrationFeature}`} aria-labelledby="pixel-fingerprint">
+        <div className={styles.calibrationContent}>
+          <h2 id="pixel-fingerprint">Genuine Google Pixel Screen Replacement &amp; Fingerprint Calibration</h2>
+          <p>At Ali Mobile &amp; Repair, we offer genuine screen replacement parts for supported Google Pixel models, helping maintain the original display experience.</p>
+          <p>For compatible models with an under-display fingerprint sensor, we use Google&apos;s official fingerprint calibration software when required after screen replacement.</p>
+          <p>We also carry out post-repair checks, including display quality, touch response and fingerprint sensor functionality. Where necessary, customers can verify fingerprint enrolment and unlocking before collecting their devices.</p>
+          <p>Our goal is to replace the damaged screen and confirm that the repaired device&apos;s key functions have been properly checked.</p>
+          <p>Pixel 6 and later non-folding models use an under-display fingerprint path, while Fold models use a side-mounted sensor arrangement. These are different repair and testing paths.</p>
+          <p>Google provides an official <a href="https://pixelrepair.withgoogle.com/" target="_blank" rel="noreferrer">Pixel Update and Software Repair tool</a> with a fingerprint calibration option, plus the <a href="https://support.google.com/pixelphone/answer/14257407?hl=en-AU" target="_blank" rel="noreferrer">Pixel Repair Diagnostics App</a>.</p>
+          <p>Supported phones can also use <a href="https://support.google.com/pixelphone/answer/14266732?hl=en-AU" target="_blank" rel="noreferrer">Pixel Repair Mode</a> to limit access to personal data during service. Back up important data first and do not share the normal lock-screen PIN.</p>
+          <p>All repairs are subject to model compatibility, parts availability and our applicable 6-month repair warranty.</p>
+        </div>
       </section>
 
       <section className={styles.wideSection} aria-labelledby="pixel-repair-results">
