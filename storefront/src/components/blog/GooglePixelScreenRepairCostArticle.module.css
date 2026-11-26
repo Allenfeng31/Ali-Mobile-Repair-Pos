@@ -1,0 +1,327 @@
+.article {
+  color: var(--foreground);
+}
+
+.article section + section {
+  margin-top: 2.75rem;
+}
+
+.readingSection,
+.guideNav {
+  width: min(100%, 820px);
+  margin-inline: auto;
+}
+
+.wideSection {
+  width: 100%;
+}
+
+.article h2 {
+  margin: 0 0 1rem;
+}
+
+.article h3 {
+  margin: 1.5rem 0 0.5rem;
+}
+
+.article p,
+.article li {
+  color: var(--foreground);
+  line-height: 1.72;
+}
+
+.article ul,
+.article ol {
+  padding-left: 1.35rem;
+}
+
+.article a {
+  overflow-wrap: anywhere;
+}
+
+.guideNav {
+  padding: 1.25rem;
+  border: 1px solid var(--layer-border);
+  border-radius: 0.75rem;
+  background: var(--secondary);
+  text-align: center;
+}
+
+.guideNav h2 {
+  font-size: 1rem;
+}
+
+.guideNav nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+}
+
+.guideNav a,
+.modelLink,
+.article p a {
+  color: var(--primary);
+  font-weight: 700;
+  text-underline-offset: 0.18em;
+}
+
+.guideNav a:focus-visible,
+.modelLink:focus-visible,
+.article p a:focus-visible,
+.bookingPanel a:focus-visible {
+  border-radius: 0.2rem;
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.answerLead {
+  font-size: clamp(1.08rem, 1.5vw, 1.24rem);
+}
+
+.tableFrame {
+  margin: 1.25rem 0;
+  overflow: hidden;
+  border: 1px solid var(--layer-border);
+  border-radius: 0.75rem;
+}
+
+.priceTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.priceTable caption {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-weight: 750;
+}
+
+.priceTable th,
+.priceTable td {
+  padding: 0.9rem 1rem;
+  border-top: 1px solid var(--layer-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.priceTable thead th {
+  background: var(--secondary);
+}
+
+.priceCell {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.legacyPrices {
+  margin-top: 1.25rem;
+  border: 1px solid var(--layer-border);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.legacyPrices summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.legacyPrices .tableFrame {
+  text-align: left;
+}
+
+.priceNote {
+  margin-top: 0.75rem;
+}
+
+.catalogueNotice,
+.foldNotice {
+  padding: 1.25rem;
+  border: 1px solid var(--layer-border);
+  border-radius: 0.75rem;
+  background: var(--secondary);
+  text-align: center;
+}
+
+.foldNotice {
+  margin-top: 1.5rem;
+  border-color: color-mix(in srgb, var(--primary) 32%, var(--layer-border));
+}
+
+.foldNotice h3 {
+  margin-top: 0;
+}
+
+.repairExamples {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+}
+
+.repairExample {
+  padding: 1.25rem;
+  border: 1px solid var(--layer-border);
+  border-radius: 0.75rem;
+  background: var(--secondary);
+  text-align: center;
+}
+
+.repairExample h3 {
+  margin-top: 0;
+}
+
+.photoPair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.repairPhoto {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  border-radius: 0.5rem;
+  background: var(--background);
+}
+
+.repairPhoto img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.photoLabel {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  padding: 0 0.75rem;
+  border-radius: 0 0 0.5rem 0;
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 0.875rem;
+  font-weight: 750;
+}
+
+.repairPhoto figcaption {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.faqList {
+  display: grid;
+  gap: 1rem;
+}
+
+.faqList details {
+  padding: 1.25rem;
+  border: 1px solid var(--layer-border);
+  border-radius: 0.75rem;
+  text-align: center;
+}
+
+.faqList summary {
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.faqList p {
+  margin: 0.75rem 0 0;
+}
+
+.bookingPanel {
+  padding: 1.25rem;
+  border: 1px solid var(--layer-border);
+  border-radius: 0.75rem;
+  background: var(--secondary);
+  text-align: center;
+}
+
+.bookingPanel a {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .photoPair {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .article section + section {
+    margin-top: 2.25rem;
+  }
+
+  .tableFrame {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .priceTable,
+  .priceTable tbody,
+  .priceTable tr,
+  .priceTable th,
+  .priceTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .priceTable caption {
+    padding-inline: 0;
+  }
+
+  .priceTable thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .priceTable tr {
+    margin-bottom: 0.75rem;
+    padding: 1.25rem;
+    border: 1px solid var(--layer-border);
+    border-radius: 0.75rem;
+    background: var(--background);
+    text-align: center;
+  }
+
+  .priceTable th,
+  .priceTable td {
+    display: grid;
+    grid-template-columns: minmax(7.5rem, 0.8fr) minmax(0, 1.2fr);
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border: 0;
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+
+  .priceTable th::before,
+  .priceTable td::before {
+    content: attr(data-label);
+    color: var(--muted-foreground);
+    font-weight: 650;
+    text-align: left;
+  }
+
+  .legacyPrices {
+    padding: 1.25rem;
+  }
+}

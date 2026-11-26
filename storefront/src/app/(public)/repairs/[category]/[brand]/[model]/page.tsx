@@ -522,6 +522,7 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
   const isIPhoneModelPage = categorySlug === "phone" && brandSlug === "iphone";
   const isSamsungModelPage = categorySlug === "phone" && brandSlug === "samsung";
   const isGooglePixelModelPage = categorySlug === "phone" && ["google", "google-pixel", "googlepixel", "pixel"].includes(brandSlug);
+  const linksPixelScreenCostGuide = isGooglePixelModelPage && ["pixel-7", "pixel-7-pro"].includes(modelSlug);
   const isOppoModelPage = categorySlug === "phone" && brandSlug === "oppo";
   const isPrimaryPhoneModelPage = isIPhoneModelPage || isSamsungModelPage || isGooglePixelModelPage || isOppoModelPage;
   const isIPadModelPage = categorySlug === "tablet" && ["ipad", "apple"].includes(brandSlug);
@@ -2506,6 +2507,14 @@ export default async function ModelRepairSelectPage({ params }: ModelPageProps) 
                     {link.label}
                   </Link>
                 ))}
+                {linksPixelScreenCostGuide && (
+                  <Link
+                    href="/blog/google-pixel-screen-repair-cost-australia"
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-slate-950 bg-transparent px-5 py-2 text-sm font-black text-slate-900 transition-colors duration-200 hover:border-blue-700 hover:bg-blue-50/50 hover:text-blue-700"
+                  >
+                    Compare Google Pixel screen repair costs
+                  </Link>
+                )}
               </div>
             </section>
           </ScrollReveal>

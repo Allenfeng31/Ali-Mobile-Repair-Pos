@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { buildIphoneScreenRepairPriceTable, IPHONE_SCREEN_REPAIR_COST_SLUG } from '@/data/iphoneScreenRepairCost';
+import { buildGooglePixelScreenRepairPriceTable, GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG } from '@/data/googlePixelScreenRepairCost';
 import { buildIpadScreenRepairPriceTable, IPAD_SCREEN_REPAIR_COST_SLUG } from '@/data/ipadScreenRepairCost';
 import { buildMacbookAirScreenRepairPriceTable, MACBOOK_SCREEN_REPAIR_BLOG_SLUG } from '@/data/macbookScreenRepairBlog';
 import { buildPhoneScreenBrandPriceTable, PHONE_SCREEN_BLACK_BLOG_SLUG } from '@/data/phoneScreenBlackArticle';
@@ -15,6 +16,7 @@ export const PRICE_BLOG_SLUGS = [
   IPAD_SCREEN_REPAIR_COST_SLUG,
   PHONE_SCREEN_BLACK_BLOG_SLUG,
   SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG,
+  GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG,
 ] as const;
 export type PriceBlogSlug = typeof PRICE_BLOG_SLUGS[number];
 export type BlogPriceFreshness = Partial<Record<PriceBlogSlug, { fingerprint: string; priceChangedAt: string | null }>>;
@@ -32,6 +34,7 @@ export function displayedBlogPriceFingerprints(brands: BrandEntry[]): Record<Pri
     [IPAD_SCREEN_REPAIR_COST_SLUG]: buildIpadScreenRepairPriceTable({ brands: displayedBrands }),
     [PHONE_SCREEN_BLACK_BLOG_SLUG]: buildPhoneScreenBrandPriceTable({ brands: displayedBrands }),
     [SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG]: buildSamsungGalaxySScreenRepairPriceTable({ brands: displayedBrands }),
+    [GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG]: buildGooglePixelScreenRepairPriceTable({ brands: displayedBrands }),
   };
   return Object.fromEntries(PRICE_BLOG_SLUGS.map((slug) => {
     const table = tables[slug];

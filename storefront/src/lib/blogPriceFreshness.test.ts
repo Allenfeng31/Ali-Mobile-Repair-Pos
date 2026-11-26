@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { MACBOOK_SCREEN_REPAIR_BLOG_SLUG } from '@/data/macbookScreenRepairBlog';
 import { IPHONE_SCREEN_REPAIR_COST_SLUG } from '@/data/iphoneScreenRepairCost';
 import { IPAD_SCREEN_REPAIR_COST_SLUG } from '@/data/ipadScreenRepairCost';
+import { GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG } from '@/data/googlePixelScreenRepairCost';
 import { PHONE_SCREEN_BLACK_BLOG_SLUG } from '@/data/phoneScreenBlackArticle';
 import { SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG } from '@/data/samsungGalaxySScreenRepairCost';
 import { displayedBlogPriceFingerprints, effectiveBlogDateModified, nextBlogPriceFreshness } from './blogPriceFreshness';
@@ -46,6 +47,16 @@ const brands: BrandEntry[] = [
       ] },
     ],
   }] },
+  { category: 'phone', brand: 'Google Pixel', slug: 'google-pixel', icon: '', models: [
+    { model: 'Pixel 7', slug: 'pixel-7', repairTypes: [
+      { name: 'Screen', slug: 'screen-replacement', price: 270, repairOrigin: 'pos', variants: [
+        { quality_grade: 'Genuine', price: 270, is_recommended: true },
+      ] },
+    ] },
+    { model: 'Pixel 9 Pro Fold', slug: 'pixel-9-pro-fold', repairTypes: [
+      { name: 'Screen', slug: 'screen-replacement', price: 470, repairOrigin: 'pos' },
+    ] },
+  ] },
 ];
 const clone = () => structuredClone(brands);
 
@@ -57,6 +68,7 @@ describe('verified displayed Blog price freshness', () => {
     expect(initial[IPAD_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt).toBeNull();
     expect(initial[PHONE_SCREEN_BLACK_BLOG_SLUG]?.priceChangedAt).toBeNull();
     expect(initial[SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt).toBeNull();
+    expect(initial[GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt).toBeNull();
   });
 
   it('keeps dates through a no-op refresh, input reordering and a restart', () => {
@@ -104,6 +116,26 @@ describe('verified displayed Blog price freshness', () => {
     labelChanged[3]!.models[0]!.repairTypes[0]!.variants![1]!.quality_grade = 'Aftermarket';
     const renamed = nextBlogPriceFreshness(labelChanged, initial, '2026-11-15T03:00:00Z');
     expect(renamed[SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt).toBe('2026-11-15T03:00:00Z');
+  });
+
+  it('updates Pixel freshness for a displayed non-Fold price change', () => {
+    const initial = nextBlogPriceFreshness(brands, undefined, confirmedAt);
+    const changed = clone();
+    const pixel = changed.find((brand) => brand.slug === 'google-pixel')!;
+    pixel.models.find((model) => model.slug === 'pixel-7')!.repairTypes[0]!.variants![0]!.price = 280;
+    const next = nextBlogPriceFreshness(changed, initial, '2026-11-14T03:00:00Z');
+
+    expect(next[GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt).toBe('2026-11-14T03:00:00Z');
+  });
+
+  it('does not treat excluded Fold amounts as a Pixel Blog price update', () => {
+    const initial = nextBlogPriceFreshness(brands, undefined, confirmedAt);
+    const changed = clone();
+    const pixel = changed.find((brand) => brand.slug === 'google-pixel')!;
+    pixel.models.find((model) => model.slug === 'pixel-9-pro-fold')!.repairTypes[0]!.price = 520;
+    const next = nextBlogPriceFreshness(changed, initial, '2026-11-14T03:00:00Z');
+
+    expect(next[GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG]).toEqual(initial[GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG]);
   });
 
   it('updates only the MacBook date for an Air price or Quote Required transition', () => {

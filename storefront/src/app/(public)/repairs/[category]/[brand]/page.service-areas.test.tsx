@@ -342,6 +342,8 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     expect(warrantyFaq?.textContent).toContain("Completed standard repairs include a 6-month warranty covering the replacement part and labour.");
     expect(warrantyFaq?.textContent).toContain("The service has no warranty.");
     expect(container.querySelector('a[href="/book-repair"]')?.textContent).toContain("Book a Repair");
+    expect(container.querySelector('a[href="/blog/google-pixel-screen-repair-cost-australia"]')?.textContent)
+      .toContain("Google Pixel screen repair cost guide");
     expect(container.textContent).not.toContain("live pricing");
     expect(container.textContent).not.toContain("Live Quote");
     expect(ssrHtml).toContain("Screen Replacement: AUD $129–$450");

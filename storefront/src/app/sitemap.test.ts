@@ -46,6 +46,11 @@ fetchRepairCatalogMock.mockResolvedValue({
 });
 
 describe('Sitemap SEO Generation', () => {
+  it('includes the committed Google Pixel screen cost article', async () => {
+    const paths = (await sitemap()).map((entry) => new URL(entry.url).pathname);
+    expect(paths).toContain('/blog/google-pixel-screen-repair-cost-australia');
+  });
+
   it('includes every canonical Category Hub once when the catalogue resolves', async () => {
     const paths = (await sitemap()).map((entry) => new URL(entry.url).pathname);
 

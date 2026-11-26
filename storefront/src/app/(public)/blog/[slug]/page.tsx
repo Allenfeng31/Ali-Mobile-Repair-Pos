@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { BlogImage } from "@/components/BlogImage";
+import { GooglePixelScreenRepairCostArticle } from "@/components/blog/GooglePixelScreenRepairCostArticle";
 import { IphoneBatteryHealthArticle } from "@/components/blog/IphoneBatteryHealthArticle";
 import { IphoneScreenRepairCostArticle } from "@/components/blog/IphoneScreenRepairCostArticle";
 import { IpadScreenRepairCostArticle } from "@/components/blog/IpadScreenRepairCostArticle";
@@ -13,6 +14,7 @@ import { PhoneNotChargingArticle } from "@/components/blog/PhoneNotChargingArtic
 import { PhoneScreenBlackArticle } from "@/components/blog/PhoneScreenBlackArticle";
 import { SamsungGalaxySScreenRepairCostArticle } from "@/components/blog/SamsungGalaxySScreenRepairCostArticle";
 import { buildIphoneScreenRepairPriceTable, IPHONE_SCREEN_REPAIR_COST_SLUG } from "@/data/iphoneScreenRepairCost";
+import { buildGooglePixelScreenRepairPriceTable, GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG } from "@/data/googlePixelScreenRepairCost";
 import { buildIpadScreenRepairPriceTable, IPAD_SCREEN_REPAIR_COST_SLUG } from "@/data/ipadScreenRepairCost";
 import { buildMacbookAirScreenRepairPriceTable, MACBOOK_SCREEN_REPAIR_BLOG_SLUG } from "@/data/macbookScreenRepairBlog";
 import { buildPhoneScreenBrandPriceTable, PHONE_SCREEN_BLACK_BLOG_SLUG } from "@/data/phoneScreenBlackArticle";
@@ -123,6 +125,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   const isPhoneScreenBlackArticle = slug === PHONE_SCREEN_BLACK_BLOG_SLUG;
   const isMacbookScreenRepairArticle = slug === MACBOOK_SCREEN_REPAIR_BLOG_SLUG;
   const isSamsungGalaxySScreenCostArticle = slug === SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG;
+  const isGooglePixelScreenCostArticle = slug === GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG;
   let postData: BlogPost;
   if (isSamsungGalaxySScreenCostArticle) {
     const editorialPost = await getPostData(slug);
@@ -206,6 +209,18 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
     } catch {
       // Do not substitute stale fixed prices when the public catalogue is unavailable.
       samsungGalaxySScreenPriceTable = null;
+    }
+  }
+
+  let googlePixelScreenPriceTable = null;
+  if (isGooglePixelScreenCostArticle) {
+    try {
+      const catalogue = await getBlogCatalogue();
+      googlePixelScreenPriceTable = buildGooglePixelScreenRepairPriceTable(catalogue);
+      priceChangedAt = catalogue.blogPriceFreshness?.[GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt ?? null;
+    } catch {
+      // Do not substitute hard-coded prices when the public catalogue is unavailable.
+      googlePixelScreenPriceTable = null;
     }
   }
 
@@ -298,7 +313,9 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
         </section>
 
         <article className={styles.articleCard}>
-          {isSamsungGalaxySScreenCostArticle ? (
+          {isGooglePixelScreenCostArticle ? (
+            <GooglePixelScreenRepairCostArticle priceTable={googlePixelScreenPriceTable} />
+          ) : isSamsungGalaxySScreenCostArticle ? (
           <SamsungGalaxySScreenRepairCostArticle priceTable={samsungGalaxySScreenPriceTable} />
           ) : isIphoneScreenCostArticle ? (
             <IphoneScreenRepairCostArticle priceTable={iphoneScreenPriceTable} />
@@ -332,6 +349,8 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
               ? "Bring your iPhone to Ali Mobile & Repair for an assessment. Contact us first to confirm your model, issue and timing."
               : isPhoneScreenBlackArticle
               ? "Bring your phone to Ali Mobile & Repair for display and power checks. We will confirm the likely fault and available repair options before work begins."
+              : isGooglePixelScreenCostArticle
+              ? "Bring your Google Pixel to Ali Mobile & Repair for model confirmation, display testing and a repair assessment. The available part, price and timing are confirmed before work begins."
               : "Bring your phone, tablet, or laptop to Ali Mobile & Repair for a practical quote and same-day repair may be available for many common phone models when parts are in stock. Contact us first to confirm your model, issue and timing."}
           </p>
           <Link href="/book-repair" className={styles.ctaButton}>
