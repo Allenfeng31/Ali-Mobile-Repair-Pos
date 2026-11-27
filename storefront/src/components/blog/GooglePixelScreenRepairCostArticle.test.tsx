@@ -34,14 +34,16 @@ function renderArticle(table: GooglePixelScreenRepairPriceTable | null = priceTa
 }
 
 describe("Google Pixel screen repair cost article", () => {
-  it("renders a dynamic non-Fold price range and exact model options", () => {
+  it("renders a Genuine-only range while keeping non-Genuine models available for quote", () => {
     const html = renderArticle();
     const document = new DOMParser().parseFromString(html, "text/html");
 
-    expect(document.body.textContent).toContain("prices range from $160 to $370");
-    expect(html).toContain('aria-label="Pixel 10 Pro, Genuine, $290"');
-    expect(html).toContain('aria-label="Pixel 10 Pro, Premium, $270"');
-    expect(html).toContain('aria-label="Pixel 3a, Standard, Quote"');
+    expect(document.body.textContent).toContain("prices range from $160 to $320");
+    expect(html).toContain('aria-label="Pixel 10 Pro, Genuine Parts, $290"');
+    expect(html).toContain('aria-label="Pixel 9 Pro XL, Genuine Parts, Contact for Quote"');
+    expect(html).toContain('aria-label="Pixel 6a, Genuine Parts, Contact for Quote"');
+    expect(html).toContain('aria-label="Pixel 3a, Genuine Parts, Contact for Quote"');
+    expect(document.body.textContent).not.toMatch(/Premium|Standard|\$370|\$250/);
     expect(html).not.toMatch(/aria-label="[^"]+, \$0"/);
     expect(html).not.toContain("$470");
     expect(html).not.toContain('aria-label="Pixel 10 Pro Fold');
@@ -76,7 +78,7 @@ describe("Google Pixel screen repair cost article", () => {
     ].forEach((href) => expect(html).toContain(`href="${href}"`));
     expect(html).toContain("Genuine Google Pixel replacement parts");
     expect(html).not.toContain("Genuine, Premium and Standard are the quality-grade names");
-    expect(html).toContain("A different catalogue grade is never relabelled as Genuine");
+    expect(html).toContain("A different catalogue grade is never relabelled or priced as Genuine");
     expect(html).toContain("Genuine Google Pixel Screen Replacement &amp; Fingerprint Calibration");
     expect(document.body.textContent).toContain("we offer genuine screen replacement parts for supported Google Pixel models");
     expect(document.body.textContent).toContain("Google's official fingerprint calibration software when required");

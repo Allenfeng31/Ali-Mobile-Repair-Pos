@@ -70,15 +70,15 @@ describe("Google Pixel screen repair cost Blog route", () => {
     expect(html).not.toContain('"@type":"FAQPage"');
   });
 
-  it("renders exact catalogue grades, Quote and canonical detail links in raw HTML", async () => {
+  it("renders Genuine-only prices, quote fallbacks and canonical detail links in raw HTML", async () => {
     const html = renderToStaticMarkup(await PostDetail({ params }));
 
-    expect(html).toContain('aria-label="Pixel 7, Genuine, $270"');
-    expect(html).toContain('aria-label="Pixel 7, Premium, $240"');
-    expect(html).toContain('aria-label="Pixel 3a, Standard, Quote"');
+    expect(html).toContain('aria-label="Pixel 7, Genuine Parts, $270"');
+    expect(html).toContain('aria-label="Pixel 3a, Genuine Parts, Contact for Quote"');
     expect(html).toContain('href="/repairs/phone/google-pixel/pixel-7/screen-replacement"');
     expect(html).toContain('href="/repairs/phone/google-pixel/pixel-7-pro/screen-replacement"');
-    expect(html).toContain("prices range from <strong>$240 to $320</strong>");
+    expect(html).toContain("prices range from <strong>$270 to $320</strong>");
+    expect(html).not.toMatch(/Premium|Standard|\$240/);
     expect(html).not.toContain("$470");
     expect(html).not.toMatch(/aria-label="[^"]+, \$0"/);
   });
@@ -88,7 +88,7 @@ describe("Google Pixel screen repair cost Blog route", () => {
 
     const html = renderToStaticMarkup(await PostDetail({ params }));
 
-    expect(html).toContain("Current fixed Google Pixel screen prices are temporarily unavailable");
+    expect(html).toContain("Current fixed Genuine Google Pixel screen prices are temporarily unavailable");
     expect(html).not.toContain("<table");
     expect(html).not.toMatch(/\$(160|240|270|320|370|470)/);
   });

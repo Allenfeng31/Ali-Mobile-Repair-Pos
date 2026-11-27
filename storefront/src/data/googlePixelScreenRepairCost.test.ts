@@ -101,7 +101,7 @@ function catalogue() {
 }
 
 describe("Google Pixel screen repair cost table", () => {
-  it("uses exact Pixel screen rows, keeps grades separate and excludes Fold prices", () => {
+  it("shows only exact Genuine prices, keeps other models as Genuine quotes and excludes Fold prices", () => {
     const table = buildGooglePixelScreenRepairPriceTable(catalogue());
 
     expect(GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG).toBe("google-pixel-screen-repair-cost-australia");
@@ -118,13 +118,14 @@ describe("Google Pixel screen repair cost table", () => {
     ]);
     expect(table.rows[0]).toMatchObject({
       model: "Pixel 10 Pro",
-      prices: { Genuine: 290, Premium: 270 },
+      prices: { Genuine: 290 },
       quoteTiers: [],
     });
-    expect(table.rows[1]).toMatchObject({ prices: { Premium: 370 } });
-    expect(table.rows[2]).toMatchObject({ prices: { Standard: 250 } });
-    expect(table.rows[3]).toMatchObject({ prices: {}, quoteTiers: ["Standard"] });
-    expect(table.range).toEqual({ min: 250, max: 370 });
+    expect(table.rows[1]).toMatchObject({ prices: {}, quoteTiers: ["Genuine"] });
+    expect(table.rows[2]).toMatchObject({ prices: {}, quoteTiers: ["Genuine"] });
+    expect(table.rows[3]).toMatchObject({ prices: {}, quoteTiers: ["Genuine"] });
+    expect(table.range).toEqual({ min: 290, max: 290 });
+    expect(JSON.stringify(table)).not.toMatch(/Premium|Standard|370|250/);
     expect(JSON.stringify(table)).not.toContain("470");
     expect(JSON.stringify(table)).not.toContain('"model":"Pixel Alias"');
     expect(JSON.stringify(table)).not.toContain('"model":"Pixel 8"');
@@ -142,7 +143,25 @@ describe("Google Pixel screen repair cost table", () => {
     const table = buildGooglePixelScreenRepairPriceTable(input);
     const row = table.rows.find((candidate) => candidate.slug === "pixel-10-pro");
 
-    expect(row).toMatchObject({ prices: {}, quoteTiers: ["Genuine", "Premium"] });
-    expect(table.range).toEqual({ min: 250, max: 370 });
+    expect(row).toMatchObject({ prices: {}, quoteTiers: ["Genuine"] });
+    expect(table.range).toBeNull();
+  });
+
+  it("requires the exact Genuine grade and never substitutes a base or other-grade price", () => {
+    const input = catalogue();
+    const pixel10 = input.brands[0]!.models[1]!;
+    pixel10.repairTypes[0]!.price = 999;
+    pixel10.repairTypes[0]!.variants = [
+      { quality_grade: "genuine", price: 290 },
+      { quality_grade: "Genuine ", price: 280 },
+      { quality_grade: "Premium", price: 270 },
+    ];
+
+    const table = buildGooglePixelScreenRepairPriceTable(input);
+    const row = table.rows.find((candidate) => candidate.slug === "pixel-10-pro");
+
+    expect(row).toMatchObject({ prices: {}, quoteTiers: ["Genuine"] });
+    expect(table.range).toBeNull();
+    expect(JSON.stringify(table)).not.toMatch(/999|290|280|270/);
   });
 });

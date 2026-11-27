@@ -8,8 +8,6 @@ import type {
 
 import styles from "./GooglePixelScreenRepairCostArticle.module.css";
 
-const QUALITY_ORDER = ["Genuine", "Premium", "Standard", "Current price"];
-
 function formatPrice(price: number) {
   return `$${price}`;
 }
@@ -29,21 +27,25 @@ function generation(model: string) {
   return Number(model.match(/Pixel\s+(\d+)/i)?.[1] ?? 0);
 }
 
-function compareQuality(left: string, right: string) {
-  const leftIndex = QUALITY_ORDER.indexOf(left);
-  const rightIndex = QUALITY_ORDER.indexOf(right);
-  return (leftIndex === -1 ? QUALITY_ORDER.length : leftIndex)
-    - (rightIndex === -1 ? QUALITY_ORDER.length : rightIndex)
-    || left.localeCompare(right);
+function rowOptions(row: GooglePixelScreenRepairPriceRow) {
+  const genuinePrice = row.prices.Genuine;
+  const hasValidGenuinePrice = Number.isFinite(genuinePrice) && genuinePrice > 0;
+
+  return [{
+    quality: "Genuine Parts",
+    price: hasValidGenuinePrice ? genuinePrice : undefined,
+    isQuote: !hasValidGenuinePrice,
+  }];
 }
 
-function rowOptions(row: GooglePixelScreenRepairPriceRow) {
-  const labels = new Set([...Object.keys(row.prices), ...row.quoteTiers]);
-  return [...labels].sort(compareQuality).map((quality) => ({
-    quality,
-    price: row.prices[quality],
-    isQuote: row.quoteTiers.includes(quality),
-  }));
+function genuinePriceRange(rows: GooglePixelScreenRepairPriceRow[]) {
+  const validPrices = rows
+    .map((row) => row.prices.Genuine)
+    .filter((price): price is number => Number.isFinite(price) && price > 0);
+
+  return validPrices.length > 0
+    ? { min: Math.min(...validPrices), max: Math.max(...validPrices) }
+    : null;
 }
 
 function PriceTable({ rows, label }: { rows: GooglePixelScreenRepairPriceRow[]; label: string }) {
@@ -54,13 +56,13 @@ function PriceTable({ rows, label }: { rows: GooglePixelScreenRepairPriceRow[]; 
         <thead>
           <tr>
             <th scope="col">Model</th>
-            <th scope="col">Available screen option</th>
+            <th scope="col">Genuine part</th>
             <th scope="col">Current price</th>
           </tr>
         </thead>
         <tbody>
           {rows.flatMap((row) => rowOptions(row).map(({ quality, price, isQuote }) => {
-            const priceText = price === undefined ? (isQuote ? "Quote" : "—") : formatPrice(price);
+            const priceText = price === undefined ? (isQuote ? "Contact for Quote" : "—") : formatPrice(price);
             const href = `/repairs/phone/google-pixel/${row.slug}/screen-replacement`;
 
             return (
@@ -68,7 +70,7 @@ function PriceTable({ rows, label }: { rows: GooglePixelScreenRepairPriceRow[]; 
                 <th scope="row" data-label="Model">
                   <Link className={styles.modelLink} href={href} prefetch={false}>{row.model}</Link>
                 </th>
-                <td data-label="Screen option">{quality}</td>
+                <td data-label="Genuine part">{quality}</td>
                 <td className={styles.priceCell} data-label="Current price">{priceText}</td>
               </tr>
             );
@@ -115,7 +117,7 @@ const repairExamples = [
 const faqs = [
   {
     question: "How much does Google Pixel screen replacement cost?",
-    answer: "The current fixed price depends on the exact Pixel model and the screen option listed for it. Use the live catalogue table above; models without a valid fixed amount are marked Quote rather than shown as $0.",
+    answer: "The current fixed Genuine price depends on the exact Pixel model. Use the live catalogue table above; models without a valid Genuine amount are marked Contact for Quote rather than shown using another grade or as $0.",
   },
   {
     question: "How long does a Google Pixel screen repair take?",
@@ -135,7 +137,7 @@ const faqs = [
   },
   {
     question: "Will the replacement screen quality be the same?",
-    answer: <>Ali Mobile offers <strong>genuine parts for supported Pixel models</strong>. We confirm model compatibility and parts availability before repair. A different POS catalogue grade is not represented as Genuine.</>,
+    answer: <>Ali Mobile offers <strong>genuine parts for supported Pixel models</strong>. Only a POS price explicitly labelled Genuine is published as a fixed price; otherwise the model is marked Contact for Quote.</>,
   },
   {
     question: "Will my Pixel still be water-resistant after repair?",
@@ -159,7 +161,7 @@ export function GooglePixelScreenRepairCostArticle({
   const currentRows = priceTable?.rows.filter((row) => generation(row.model) >= 7) ?? [];
   const legacyRows = priceTable?.rows.filter((row) => generation(row.model) < 7) ?? [];
   const freshnessLabel = catalogueFreshnessLabel(priceTable?.fetchedAt ?? null);
-  const range = priceTable?.range;
+  const range = genuinePriceRange(priceTable?.rows ?? []);
 
   return (
     <div className={styles.article}>
@@ -168,7 +170,7 @@ export function GooglePixelScreenRepairCostArticle({
         <nav aria-label="Google Pixel screen repair cost guide">
           <a href="#pixel-quick-answer">Quick answer</a>
           <a href="#pixel-price-table">Prices</a>
-          <a href="#pixel-screen-options">Screen options</a>
+          <a href="#pixel-screen-options">Genuine parts</a>
           <a href="#pixel-fingerprint">Fingerprint checks</a>
           <a href="#pixel-repair-results">Real repairs</a>
           <a href="#pixel-faq">FAQs</a>
@@ -179,11 +181,15 @@ export function GooglePixelScreenRepairCostArticle({
         <h2 id="pixel-quick-answer">Google Pixel screen repair cost: quick answer</h2>
         {range ? (
           <p className={styles.answerLead}>
-            Ali Mobile&apos;s currently published Google Pixel screen replacement prices range from <strong>{formatPrice(range.min)} to {formatPrice(range.max)}</strong> across the non-folding models with a valid published amount. Your exact price depends on the model and the screen option listed for it.
+            Ali Mobile&apos;s currently published Genuine Google Pixel screen replacement prices range from <strong>{formatPrice(range.min)} to {formatPrice(range.max)}</strong> across the non-folding models with a valid Genuine amount. Your exact price depends on the model and Genuine part availability.
+          </p>
+        ) : priceTable ? (
+          <p className={styles.answerLead}>
+            No valid fixed Genuine Google Pixel screen price is currently published. Find your model in the table below and contact the store for a Genuine Parts quote.
           </p>
         ) : (
           <p className={styles.answerLead}>
-            Current fixed Google Pixel screen prices are temporarily unavailable from the public repair catalogue. Contact the store with the exact model so the available option can be confirmed.
+            Current fixed Genuine Google Pixel screen prices are temporarily unavailable from the public repair catalogue. Contact the store with the exact model so Genuine part availability can be confirmed.
           </p>
         )}
         <p>
@@ -193,7 +199,7 @@ export function GooglePixelScreenRepairCostArticle({
 
       <section className={styles.wideSection} aria-labelledby="pixel-price-table">
         <h2 id="pixel-price-table">Current Google Pixel screen replacement prices</h2>
-        <p><strong>Current repair prices</strong> retain the exact POS catalogue grade published for each model. A grade is never renamed, and multiple catalogue entries remain separate.</p>
+        <p><strong>Current Genuine repair prices</strong> are published only when the POS catalogue contains an exact Genuine grade with a valid positive amount. Other models remain listed for a Genuine Parts quote.</p>
         {priceTable && priceTable.rows.length > 0 ? (
           <>
             {currentRows.length > 0 && <PriceTable rows={currentRows} label="Current Google Pixel 7 and newer screen replacement prices" />}
@@ -207,7 +213,7 @@ export function GooglePixelScreenRepairCostArticle({
         ) : (
           <p className={styles.catalogueNotice}>Current fixed Google Pixel screen prices are temporarily unavailable from the online catalogue. Contact us for a quote for your exact model.</p>
         )}
-        <p className={styles.priceNote}><strong>Quote</strong> means the catalogue contains the repair option but no valid positive fixed price. No invalid or zero amount is displayed as an offer.</p>
+        <p className={styles.priceNote}><strong>Contact for Quote</strong> means the model has no valid published Genuine amount. Other grades, invalid prices and zero prices are not displayed as Genuine offers.</p>
         <p className={styles.priceNote}>
           {freshnessLabel ? `Catalogue snapshot refreshed ${freshnessLabel}. ` : ""}Prices may change with parts and model availability. See the broader <Link href="/repairs/screen-replacement" prefetch={false}>screen replacement service</Link> for the inspection path.
         </p>
@@ -231,7 +237,7 @@ export function GooglePixelScreenRepairCostArticle({
       <section className={styles.readingSection} aria-labelledby="pixel-screen-options">
         <h2 id="pixel-screen-options">Genuine Google Pixel replacement parts</h2>
         <p>For supported models, Ali Mobile offers <strong>genuine Google Pixel screen replacement parts</strong> to help maintain the original display experience. We confirm exact model compatibility and <strong>parts availability</strong> before repair.</p>
-        <p>The live table retains the original POS catalogue grade and price for accuracy. <strong>A different catalogue grade is never relabelled as Genuine</strong>, and its price is not used as a Genuine quote.</p>
+        <p>The live table publishes only POS prices explicitly labelled Genuine. <strong>A different catalogue grade is never relabelled or priced as Genuine</strong>; the model remains available for a Genuine Parts quote.</p>
       </section>
 
       <section className={styles.readingSection} aria-labelledby="pixel-screen-problems">
@@ -277,7 +283,7 @@ export function GooglePixelScreenRepairCostArticle({
 
       <section className={styles.wideSection} aria-labelledby="pixel-repair-results">
         <h2 id="pixel-repair-results">Real Google Pixel screen repair results</h2>
-        <p>These public, privacy-checked repair records show actual Pixel screen faults before replacement and the working display visible during testing afterwards. The photos do not claim a screen grade beyond the option confirmed for that individual repair.</p>
+        <p>These public, privacy-checked repair records show actual Pixel screen faults before replacement and the working display visible during testing afterwards. The photos document repair results but do not independently verify part identity or specifications.</p>
         <div className={styles.repairExamples}>
           {repairExamples.map((example) => (
             <article className={styles.repairExample} key={example.model}>
@@ -304,7 +310,7 @@ export function GooglePixelScreenRepairCostArticle({
         <h2 id="pixel-repair-process">Repair process, timing and warranty</h2>
         <ol>
           <li><strong>Confirm the model:</strong> inspect the display, touch response and frame.</li>
-          <li><strong>Confirm the price:</strong> explain the available screen option, fixed price or quote requirements before work begins.</li>
+          <li><strong>Confirm the price:</strong> explain Genuine part availability, the fixed price or quote requirements before work begins.</li>
           <li><strong>Replace the display:</strong> fit the supported assembly and handle the frame adhesive carefully.</li>
           <li><strong>Test key functions:</strong> check the image, touch, charging, cameras and fingerprint function where applicable.</li>
         </ol>
@@ -331,7 +337,7 @@ export function GooglePixelScreenRepairCostArticle({
 
       <section className={styles.bookingPanel} aria-labelledby="pixel-booking">
         <h2 id="pixel-booking">Book a Google Pixel screen assessment in Ringwood</h2>
-        <p>Bring the phone to Ali Mobile &amp; Repair at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134. We confirm the model, screen option, price and timing before work begins.</p>
+        <p>Bring the phone to Ali Mobile &amp; Repair at Ringwood Square Shopping Centre Kiosk C1, Seymour St, Ringwood VIC 3134. We confirm the model, Genuine part availability, price and timing before work begins.</p>
         <Link href="/book-repair" prefetch={false}>Book a repair assessment</Link>
       </section>
     </div>

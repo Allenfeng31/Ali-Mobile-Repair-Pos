@@ -53,6 +53,12 @@ const brands: BrandEntry[] = [
         { quality_grade: 'Genuine', price: 270, is_recommended: true },
       ] },
     ] },
+    { model: 'Pixel 9 Pro XL', slug: 'pixel-9-pro-xl', repairTypes: [
+      { name: 'Screen', slug: 'screen-replacement', price: 370, repairOrigin: 'pos', variants: [
+        { quality_grade: 'Premium', price: 370, is_recommended: true },
+        { quality_grade: 'Standard', price: 330, is_recommended: false },
+      ] },
+    ] },
     { model: 'Pixel 9 Pro Fold', slug: 'pixel-9-pro-fold', repairTypes: [
       { name: 'Screen', slug: 'screen-replacement', price: 470, repairOrigin: 'pos' },
     ] },
@@ -118,7 +124,7 @@ describe('verified displayed Blog price freshness', () => {
     expect(renamed[SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt).toBe('2026-11-15T03:00:00Z');
   });
 
-  it('updates Pixel freshness for a displayed non-Fold price change', () => {
+  it('updates Pixel freshness for a displayed Genuine non-Fold price change', () => {
     const initial = nextBlogPriceFreshness(brands, undefined, confirmedAt);
     const changed = clone();
     const pixel = changed.find((brand) => brand.slug === 'google-pixel')!;
@@ -126,6 +132,17 @@ describe('verified displayed Blog price freshness', () => {
     const next = nextBlogPriceFreshness(changed, initial, '2026-11-14T03:00:00Z');
 
     expect(next[GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG]?.priceChangedAt).toBe('2026-11-14T03:00:00Z');
+  });
+
+  it('does not update Pixel freshness for Premium or Standard price changes', () => {
+    const initial = nextBlogPriceFreshness(brands, undefined, confirmedAt);
+    const changed = clone();
+    const pixel = changed.find((brand) => brand.slug === 'google-pixel')!;
+    pixel.models.find((model) => model.slug === 'pixel-9-pro-xl')!.repairTypes[0]!.variants![0]!.price = 390;
+    pixel.models.find((model) => model.slug === 'pixel-9-pro-xl')!.repairTypes[0]!.variants![1]!.price = 350;
+    const next = nextBlogPriceFreshness(changed, initial, '2026-11-14T03:00:00Z');
+
+    expect(next[GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG]).toEqual(initial[GOOGLE_PIXEL_SCREEN_REPAIR_COST_SLUG]);
   });
 
   it('does not treat excluded Fold amounts as a Pixel Blog price update', () => {

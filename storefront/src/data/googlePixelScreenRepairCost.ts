@@ -52,18 +52,15 @@ function compareModelsNewestFirst(
   return generationDifference || variantDifference || collator.compare(right.model, left.model);
 }
 
-function gradeLabel(value: string | undefined) {
-  return value?.trim() || "Current price";
-}
-
 function isFoldModel(slug: string) {
   return slug.endsWith("-fold");
 }
 
 /**
- * Builds Pixel Blog pricing from the same public catalogue and positive-price
- * resolver used by repair details. Fold prices stay outside the comparison
- * table until the affected display component can be confirmed.
+ * Builds the Genuine-only Pixel Blog pricing from the public catalogue and
+ * positive-price resolver used by repair details. Other grades are never
+ * relabelled; their models remain visible as Genuine quote enquiries. Fold
+ * prices stay outside the comparison until the display component is confirmed.
  */
 export function buildGooglePixelScreenRepairPriceTable(catalogue: {
   fetchedAt?: string | null;
@@ -96,26 +93,12 @@ export function buildGooglePixelScreenRepairPriceTable(catalogue: {
     .map(({ model, slug, repair }) => {
       const prices: Record<string, number> = {};
       const quoteTiers: string[] = [];
-      const variantsByGrade = new Map<string, CatalogueVariant[]>();
+      const genuineVariants = (repair.variants ?? [])
+        .filter((variant) => variant.quality_grade === "Genuine");
+      const pricing = resolveRepairDetailPricing({ variants: genuineVariants });
 
-      for (const variant of repair.variants ?? []) {
-        const label = gradeLabel(variant.quality_grade);
-        const existing = variantsByGrade.get(label) ?? [];
-        existing.push(variant);
-        variantsByGrade.set(label, existing);
-      }
-
-      if (variantsByGrade.size === 0) {
-        const pricing = resolveRepairDetailPricing({ basePrice: repair.price });
-        if (pricing.resolvedPrice === null) quoteTiers.push("Current price");
-        else prices["Current price"] = pricing.resolvedPrice;
-      } else {
-        for (const [label, variants] of variantsByGrade) {
-          const pricing = resolveRepairDetailPricing({ variants });
-          if (pricing.validVariants.length === 0) quoteTiers.push(label);
-          else prices[label] = Math.min(...pricing.validVariants.map((variant) => variant.price));
-        }
-      }
+      if (pricing.validVariants.length === 0) quoteTiers.push("Genuine");
+      else prices.Genuine = Math.min(...pricing.validVariants.map((variant) => variant.price));
 
       return {
         model,
