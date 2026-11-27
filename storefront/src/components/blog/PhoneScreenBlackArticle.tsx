@@ -199,6 +199,11 @@ export function PhoneScreenBlackArticle({ priceTable }: Props) {
             <article className={styles.repairCase} key={repair.model}>
               <h3>{repair.model}</h3>
               <p>{repair.description}</p>
+              {repair.model === "Google Pixel 7" && (
+                <p>
+                  <Link href="/blog/google-pixel-screen-repair-cost-australia">Compare current Google Pixel screen replacement prices</Link> across supported models and available catalogue grades.
+                </p>
+              )}
               <div className={styles.photoPair}>
                 <figure><Image src={repair.before} alt={repair.beforeAlt} width={1200} height={1600} sizes="(max-width: 640px) 44vw, 480px" /><figcaption>Before repair</figcaption></figure>
                 <figure><Image src={repair.after} alt={repair.afterAlt} width={1200} height={1600} sizes="(max-width: 640px) 44vw, 480px" /><figcaption>After screen replacement</figcaption></figure>

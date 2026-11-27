@@ -148,6 +148,6 @@ describe("Samsung Galaxy S screen repair cost article data", () => {
 
     const post = await getPostData(SAMSUNG_GALAXY_S_SCREEN_REPAIR_COST_SLUG);
     expect(post.date).toBe("2026-09-08");
-    expect(post.updated_at).toBe("2026-11-18");
+    expect(post.updated_at).toBe("2026-11-19");
   });
 });

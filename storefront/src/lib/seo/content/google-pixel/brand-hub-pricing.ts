@@ -2,7 +2,6 @@ export const GOOGLE_PIXEL_BRAND_HUB_PRICING_REFERENCE = {
   reviewDate: "2026-10-16",
   status: "owner-reviewed",
   rows: [
-    { service: "Screen Replacement", range: "AUD $129–$450" },
     { service: "Battery Replacement", range: "AUD $65–$179" },
     { service: "Charging Port Repair", range: "AUD $65–$179" },
   ],

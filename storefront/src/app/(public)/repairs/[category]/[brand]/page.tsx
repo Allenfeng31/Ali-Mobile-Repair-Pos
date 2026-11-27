@@ -3680,6 +3680,11 @@ export default async function BrandSubHubPage({ params }: BrandPageProps) {
                 <h2 id="brand-repair-types-heading">{usesBrandHubDesign ? `Popular ${phoneHubDisplayName} repair services` : `Common ${brandName} Repair Paths`}</h2>
               </div>
               <p>{phoneCommonRepairsIntro}</p>
+              {isGooglePixelHub && (
+                <p>
+                  Compare current model-by-model options in our <Link href="/blog/google-pixel-screen-repair-cost-australia">Google Pixel screen repair cost guide</Link>.
+                </p>
+              )}
             </div>
             <div className={usesBrandHubDesign ? "brand-hub-link-grid brand-hub-repair-link-grid" : "repair-type-card-grid"}>
               {usesBrandHubDesign ? (

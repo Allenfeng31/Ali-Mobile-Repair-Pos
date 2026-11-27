@@ -758,6 +758,22 @@ describe('Model Hub page-mode Server consumer', () => {
   });
 
   it.each([
+    ['Pixel 7', 'pixel-7', true],
+    ['Pixel 7 Pro', 'pixel-7-pro', true],
+    ['Pixel 8 Pro', 'pixel-8-pro', false],
+  ])('keeps the approved Pixel pricing-guide link scoped to %s', async (_label, modelSlug, shouldLink) => {
+    vi.mocked(fetchModelRepairTypes).mockResolvedValue(pixelModelData(modelSlug) as Awaited<ReturnType<typeof fetchModelRepairTypes>>);
+
+    const html = renderToStaticMarkup(await ModelHubPage({
+      params: Promise.resolve({ category: 'phone', brand: 'google-pixel', model: modelSlug }),
+    }));
+    const expectedHref = 'href="/blog/google-pixel-screen-repair-cost-australia"';
+
+    if (shouldLink) expect(html).toContain(expectedHref);
+    else expect(html).not.toContain(expectedHref);
+  });
+
+  it.each([
     ['iPad 10th Generation', 'ipad-10th-generation', 'Charging port repairs may require additional time depending on the repair process.', 'Fast Turnaround'],
     ['iPad Air 5th Generation', 'ipad-air-5th-generation', 'Charging port repairs may require additional time depending on the repair process.', 'Fast Turnaround'],
     ['iPad mini 7th Generation', 'ipad-mini-7th-generation', 'Choose the repair below for its current service details.', '60 Minutes'],

@@ -57,6 +57,8 @@ describe("PhoneScreenBlackArticle", () => {
     }
     expect(html).toContain("owner-confirmed Pixel 7");
     expect(html).toContain("temporary screen-protection label");
+    expect(html).toContain('href="/blog/google-pixel-screen-repair-cost-australia"');
+    expect(html).toContain("Compare current Google Pixel screen replacement prices");
     expect(html).toContain("not photographic evidence of an individual repair");
     expect(html.match(/<figure/g)).toHaveLength(7);
   });
