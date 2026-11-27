@@ -327,14 +327,14 @@ describe("Phone and tablet Brand Hub local service areas", () => {
 
     expect(heroCards).toHaveLength(3);
     expect(heroCards[0]?.textContent).toContain("Google Pixel Repair Pricing");
-    expect(heroCards[0]?.textContent).toContain("Screen Replacement: AUD $129–$450");
+    expect(heroCards[0]?.textContent).not.toContain("Screen Replacement: AUD $129–$450");
     expect(heroCards[0]?.textContent).toContain("Battery Replacement: AUD $65–$179");
     expect(heroCards[0]?.textContent).toContain("Charging Port Repair: AUD $65–$179");
     expect(heroCards[0]?.textContent).toContain("Indicative AUD prices for supported Google Pixel models, including Pixel Fold. Prices vary by model and repair options. Select your model for exact pricing or a quote.");
     expect(heroCards[1]?.textContent).toContain("Typical Repair Time: 15–60 Minutes");
     expect(heroCards[1]?.textContent).toContain("For many common Google Pixel repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.");
     expect(heroCards[2]?.textContent).toContain("We check compatible parts, confirm repair pricing and explain expected timing for your Pixel before starting any repair work.");
-    expect(pricingFaq?.textContent).toContain("Screen Replacement: AUD $129–$450");
+    expect(pricingFaq?.textContent).not.toContain("Screen Replacement: AUD $129–$450");
     expect(pricingFaq?.textContent).toContain("Pixel Fold");
     expect(pricingFaq?.textContent).toContain("Quote on Request");
     expect(timingFaq?.textContent).toContain("15–60 Minutes");
@@ -344,9 +344,10 @@ describe("Phone and tablet Brand Hub local service areas", () => {
     expect(container.querySelector('a[href="/book-repair"]')?.textContent).toContain("Book a Repair");
     expect(container.querySelector('a[href="/blog/google-pixel-screen-repair-cost-australia"]')?.textContent)
       .toContain("Google Pixel screen repair cost guide");
+    expect(container.querySelectorAll('a[href="/blog/google-pixel-screen-repair-cost-australia"]')).toHaveLength(1);
     expect(container.textContent).not.toContain("live pricing");
     expect(container.textContent).not.toContain("Live Quote");
-    expect(ssrHtml).toContain("Screen Replacement: AUD $129–$450");
+    expect(ssrHtml).not.toContain("Screen Replacement: AUD $129–$450");
     expect(ssrHtml).toContain("For many common Google Pixel repairs. Timing depends on model, parts availability and diagnosis. Foldable and complex repairs may take longer.");
     expect(ssrHtml).toContain("We check compatible parts, confirm repair pricing and explain expected timing for your Pixel before starting any repair work.");
   });
