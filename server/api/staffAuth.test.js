@@ -3,7 +3,12 @@
  */
 import { describe, expect, it, vi } from 'vitest';
 
-const { STAFF_AUTH_CODES, createRequireStaffAuth, createStaffSessionValidator } = require('./staffAuth.js');
+const {
+  STAFF_AUTH_CODES,
+  createRequireInventoryWritePermission,
+  createRequireStaffAuth,
+  createStaffSessionValidator,
+} = require('./staffAuth.js');
 
 function response() {
   return { statusCode: 200, body: null, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } };
@@ -20,6 +25,60 @@ function client({ claims, claimsError, user, userError, permissions = { user_id:
 }
 
 describe('staff authorization boundary', () => {
+  it('allows operational stock updates while reserving price and structural writes for inventory managers', () => {
+    const requireInventoryWritePermission = createRequireInventoryWritePermission();
+
+    const priceManagerNext = vi.fn();
+    requireInventoryWritePermission(
+      { staffPermissions: { can_change_inventory_price: true, is_super_admin: false } },
+      response(),
+      priceManagerNext,
+    );
+    expect(priceManagerNext).toHaveBeenCalledOnce();
+
+    const superAdminNext = vi.fn();
+    requireInventoryWritePermission(
+      { staffPermissions: { can_change_inventory_price: false, is_super_admin: true } },
+      response(),
+      superAdminNext,
+    );
+    expect(superAdminNext).toHaveBeenCalledOnce();
+
+    const stockUpdateNext = vi.fn();
+    requireInventoryWritePermission(
+      {
+        method: 'PUT',
+        body: { stock: 3, status: 'in-stock' },
+        staffPermissions: { can_change_inventory_price: false, is_super_admin: false },
+      },
+      response(),
+      stockUpdateNext,
+    );
+    expect(stockUpdateNext).toHaveBeenCalledOnce();
+
+    const deniedRes = response();
+    requireInventoryWritePermission(
+      {
+        method: 'PUT',
+        body: { price: 1 },
+        staffPermissions: { can_change_inventory_price: false, is_super_admin: false },
+      },
+      deniedRes,
+      vi.fn(),
+    );
+    expect(deniedRes).toMatchObject({ statusCode: 403, body: { code: STAFF_AUTH_CODES.denied } });
+
+    for (const method of ['POST', 'DELETE']) {
+      const structuralRes = response();
+      requireInventoryWritePermission(
+        { method, body: {}, staffPermissions: { can_change_inventory_price: false, is_super_admin: false } },
+        structuralRes,
+        vi.fn(),
+      );
+      expect(structuralRes.statusCode).toBe(403);
+    }
+  });
+
   it('rejects missing, expired, and invalid sessions with the machine-readable 401 code', async () => {
     const missingRes = response();
     await createRequireStaffAuth(client())({ headers: {} }, missingRes, vi.fn());

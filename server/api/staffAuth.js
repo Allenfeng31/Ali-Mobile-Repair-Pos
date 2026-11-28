@@ -53,7 +53,7 @@ function createStaffSessionValidator(supabase, { now = () => Date.now(), ttlMs =
 
       const { data: permissions, error: permissionsError } = await supabase
         .from('employee_permissions')
-        .select('user_id, is_super_admin')
+        .select('user_id, is_super_admin, can_change_inventory_price')
         .eq('user_id', user.id)
         .maybeSingle();
       if (permissionsError) return { ok: false, status: 500, code: STAFF_AUTH_CODES.internal, error: 'Unable to verify staff permissions.' };
@@ -104,10 +104,34 @@ function createRequireSuperAdmin() {
   };
 }
 
+function createRequireInventoryWritePermission() {
+  const protectedPriceFields = new Set(['price', 'costPrice', 'cost_price', 'margin']);
+
+  return (req, res, next) => {
+    const permissions = req.staffPermissions;
+    if (permissions?.is_super_admin === true || permissions?.can_change_inventory_price === true) {
+      return next();
+    }
+
+    const isOperationalUpdate = req.method === 'PUT'
+      && req.body
+      && typeof req.body === 'object'
+      && !Array.isArray(req.body)
+      && !Object.keys(req.body).some((field) => protectedPriceFields.has(field));
+    if (isOperationalUpdate) return next();
+
+    return res.status(403).json({
+      error: 'Inventory write permission is required.',
+      code: STAFF_AUTH_CODES.denied,
+    });
+  };
+}
+
 module.exports = {
   STAFF_AUTH_CODES,
   authFailure,
   createStaffSessionValidator,
   createRequireStaffAuth,
   createRequireSuperAdmin,
+  createRequireInventoryWritePermission,
 };

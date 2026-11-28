@@ -42,7 +42,11 @@ function authenticatedSupabase({ isSuperAdmin, employees = [], permissionRead, p
     select: vi.fn(() => permissionsQuery),
     eq: vi.fn(() => permissionsQuery),
     maybeSingle: vi.fn(async () => ({
-      data: { user_id: '00000000-0000-4000-8000-000000000001', is_super_admin: isSuperAdmin },
+      data: {
+        user_id: '00000000-0000-4000-8000-000000000001',
+        is_super_admin: isSuperAdmin,
+        can_change_inventory_price: false,
+      },
       error: null,
     })),
   };
@@ -67,7 +71,7 @@ function authenticatedSupabase({ isSuperAdmin, employees = [], permissionRead, p
   };
   supabase.from.mockReturnValue({
     select: vi.fn((columns) => {
-      if (columns === 'user_id, is_super_admin') return permissionsQuery;
+      if (columns === 'user_id, is_super_admin, can_change_inventory_price') return permissionsQuery;
       if (String(columns).includes('can_give_discount')) return readQuery;
       return Promise.resolve({ data: employees, error: null });
     }),
@@ -228,6 +232,34 @@ describe('staff management API security boundary', () => {
       await expect(response.json()).resolves.toMatchObject({
         user_id: userId,
         can_give_discount: true,
+      });
+    });
+  });
+
+  it('allows a verified Super Admin to grant inventory pricing permission', async () => {
+    const userId = '00000000-0000-4000-8000-000000000002';
+    const supabase = authenticatedSupabase({
+      isSuperAdmin: true,
+      permissionUpdate: {
+        data: { user_id: userId, can_change_inventory_price: true },
+        error: null,
+      },
+    });
+
+    await withServer(supabase, async (baseUrl) => {
+      const response = await fetch(`${baseUrl}/api/admin/employees/${userId}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: 'Bearer admin-token',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ permissions: { can_change_inventory_price: true } }),
+      });
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toMatchObject({
+        user_id: userId,
+        can_change_inventory_price: true,
       });
     });
   });

@@ -9,7 +9,8 @@ const fs = require('fs');
 const { callModelWithRetry } = require('../utils/api-utils.js');
 const { isSmsAlertEnabled } = require('./sms-gate.js');
 const { persistGoogleContactSyncTask } = require('./googleContactsSync.js');
-const { createRequireStaffAuth } = require('./staffAuth.js');
+const { createRequireInventoryWritePermission, createRequireStaffAuth } = require('./staffAuth.js');
+const { createInventoryAccessHandlers } = require('./inventoryAccess.js');
 const { createStaffAdminRouter } = require('./staffAdmin.js');
 const { createSyncContactsAdminRouter } = require('./syncContactsAdmin.js');
 const { resolveServerSupabaseKey } = require('../lib/supabaseKeyResolver.js');
@@ -125,6 +126,8 @@ if (supabaseKey) {
 
 
 const requireStaffAuth = createRequireStaffAuth(supabase);
+const requireInventoryWritePermission = createRequireInventoryWritePermission();
+const inventoryHandlers = createInventoryAccessHandlers(supabase);
 
 const getLocalIp = () => {
   const os = require('os');
@@ -595,35 +598,17 @@ app.use('/api/admin', createStaffAdminRouter(supabase));
 // ----------------------------------------------------------------------
 // INVENTORY
 // ----------------------------------------------------------------------
-app.get('/api/inventory', async (req, res) => {
-  try {
-    let allData = [];
-    let from = 0;
-    const step = 1000;
+app.get('/api/public/inventory', inventoryHandlers.listPublic);
 
-    while (true) {
-      const { data, error } = await supabase
-        .from('inventory')
-        .select('*')
-        .order('id', { ascending: true })
-        .range(from, from + step - 1);
-
-      if (error) throw error;
-      if (!data || data.length === 0) break;
-
-      allData = allData.concat(data);
-      if (data.length < step) break;
-
-      from += step;
-    }
-
-    res.json(allData);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+// Keep the legacy anonymous GET safe while Storefront consumers migrate to
+// /api/public/inventory. Supplying any Authorization header opts into the
+// authenticated internal response; invalid credentials never downgrade.
+app.get('/api/inventory', (req, res) => {
+  if (!req.headers.authorization) return inventoryHandlers.listPublic(req, res);
+  return requireStaffAuth(req, res, () => inventoryHandlers.listInternal(req, res));
 });
 
-app.post('/api/inventory', async (req, res) => {
+app.post('/api/inventory', requireStaffAuth, requireInventoryWritePermission, async (req, res) => {
   const item = req.body;
 
   // If we have a device_model and name, try to find existing first to prevent duplicates
@@ -666,7 +651,7 @@ app.post('/api/inventory', async (req, res) => {
 });
 
 // Bulk create inventory items (Batch insert for "Bulk Generate Repair Suite")
-app.post('/api/inventory/bulk', async (req, res) => {
+app.post('/api/inventory/bulk', requireStaffAuth, requireInventoryWritePermission, async (req, res) => {
   const items = req.body;
 
   if (!Array.isArray(items) || items.length === 0) {
@@ -699,7 +684,7 @@ app.post('/api/inventory/bulk', async (req, res) => {
   }
 });
 
-app.put('/api/inventory/:id', async (req, res) => {
+app.put('/api/inventory/:id', requireStaffAuth, requireInventoryWritePermission, async (req, res) => {
   const itemData = req.body;
   let { data, error } = await supabase.from('inventory').update(itemData).eq('id', req.params.id).select();
 
@@ -716,7 +701,7 @@ app.put('/api/inventory/:id', async (req, res) => {
   res.json(data[0]);
 });
 
-app.delete('/api/inventory/:id', async (req, res) => {
+app.delete('/api/inventory/:id', requireStaffAuth, requireInventoryWritePermission, async (req, res) => {
   const { error } = await supabase.from('inventory').delete().eq('id', req.params.id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
