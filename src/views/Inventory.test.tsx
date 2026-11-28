@@ -1,10 +1,17 @@
 /**
  * @vitest-environment jsdom
  */
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { InventoryView } from './Inventory';
 import { InventoryItem } from '../types';
+
+const authState = vi.hoisted(() => ({
+  permissions: {
+    is_super_admin: true,
+    can_change_inventory_price: true,
+  },
+}));
 
 // Mock API and auth store
 vi.mock('../lib/api', () => ({
@@ -18,10 +25,7 @@ vi.mock('../lib/api', () => ({
 
 vi.mock('../hooks/useAuthStore', () => ({
   useAuthStore: () => ({
-    permissions: {
-      is_super_admin: true,
-      can_change_inventory_price: true,
-    }
+    permissions: authState.permissions,
   })
 }));
 
@@ -51,7 +55,16 @@ const mockInventory: InventoryItem[] = [
   }
 ];
 
+import { api } from '../lib/api';
+
 describe('InventoryView', () => {
+  beforeEach(() => {
+    authState.permissions = {
+      is_super_admin: true,
+      can_change_inventory_price: true,
+    };
+  });
+
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
@@ -88,5 +101,34 @@ describe('InventoryView', () => {
     // The Quick edit panel has a "Grade" label.
     const gradeLabels = screen.getAllByText('Grade');
     expect(gradeLabels.length).toBeGreaterThan(0);
+  });
+
+  it('does not submit protected price fields when ordinary staff quick-save unchanged inventory', async () => {
+    authState.permissions = {
+      is_super_admin: false,
+      can_change_inventory_price: false,
+    };
+
+    render(
+      <InventoryView
+        inventory={mockInventory}
+        setInventory={vi.fn()}
+        categories={['Phone Repair']}
+        setCategories={vi.fn()}
+        brands={['iPhone']}
+        setBrands={vi.fn()}
+        t={vi.fn((_section, key) => key)}
+      />
+    );
+
+    fireEvent.click(screen.getByText('iPhone 13 Screen'));
+    fireEvent.click(screen.getByRole('button', { name: 'Quick Save' }));
+
+    await waitFor(() => expect(api.updateInventoryItem).toHaveBeenCalledOnce());
+    const [, payload] = vi.mocked(api.updateInventoryItem).mock.calls[0];
+    expect(payload).toMatchObject({ stock: 10, status: 'in-stock' });
+    expect(payload).not.toHaveProperty('price');
+    expect(payload).not.toHaveProperty('costPrice');
+    expect(payload).not.toHaveProperty('margin');
   });
 });

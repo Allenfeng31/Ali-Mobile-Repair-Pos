@@ -94,35 +94,41 @@ export const api = {
 
   // Inventory
   getInventory: async () => {
-    const res = await fetch(`${API_URL}/inventory`);
+    const authHeaders = await getStaffAuthHeaders();
+    const res = await fetch(`${API_URL}/inventory`, { headers: authHeaders });
     return handleResponse(res);
   },
   createInventoryItem: async (item: any) => {
+    const authHeaders = await getStaffAuthHeaders();
     const res = await fetch(`${API_URL}/inventory`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify(item),
     });
     return handleResponse(res);
   },
   updateInventoryItem: async (id: number | string, item: any) => {
+    const authHeaders = await getStaffAuthHeaders();
     const res = await fetch(`${API_URL}/inventory/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify(item),
     });
     return handleResponse(res);
   },
   deleteInventoryItem: async (id: number | string) => {
+    const authHeaders = await getStaffAuthHeaders();
     const res = await fetch(`${API_URL}/inventory/${id}`, {
       method: 'DELETE',
+      headers: authHeaders,
     });
     return handleResponse(res);
   },
   bulkCreateInventoryItems: async (items: any[]) => {
+    const authHeaders = await getStaffAuthHeaders();
     const res = await fetch(`${API_URL}/inventory/bulk`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify(items),
     });
     return handleResponse(res);

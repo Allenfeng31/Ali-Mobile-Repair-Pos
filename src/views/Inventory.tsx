@@ -58,6 +58,8 @@ interface InventoryViewProps {
 
 export function InventoryView({ inventory, setInventory, categories, setCategories, brands, setBrands, t }: InventoryViewProps) {
   const { permissions } = useAuthStore();
+  const canChangeInventoryPrice = permissions?.is_super_admin === true
+    || permissions?.can_change_inventory_price === true;
   const [filter, setFilter] = useState('All Parts');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -375,7 +377,12 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
 
       for (const item of existingItems) {
         const { id, ...updateData } = item;
-        const updated = await api.updateInventoryItem(id, updateData);
+        const permittedUpdateData = canChangeInventoryPrice
+          ? updateData
+          : Object.fromEntries(
+              Object.entries(updateData).filter(([field]) => !['price', 'costPrice', 'cost_price', 'margin'].includes(field)),
+            );
+        const updated = await api.updateInventoryItem(id, permittedUpdateData);
         savedItems.push(updated);
       }
 
@@ -686,6 +693,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                   <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Stock</label>
                                   <input
                                     type="number"
+                                    disabled={!canChangeInventoryPrice}
                                     className="w-full px-4 py-3 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] border-none rounded-xl text-sm text-black font-bold focus:ring-0 outline-none"
                                     value={variant.stock}
                                     onChange={e => {
@@ -712,7 +720,7 @@ export function InventoryView({ inventory, setInventory, categories, setCategori
                                   <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Selling</label>
                                   <input
                                     type="number"
-                                    disabled={!permissions?.can_change_inventory_price}
+                                    disabled={!canChangeInventoryPrice}
                                     className="w-full px-4 py-3 bg-[var(--color-neu-bg)] shadow-[var(--shadow-neu-pressed)] border-none rounded-xl text-sm text-blue-600 font-black focus:ring-0 outline-none disabled:opacity-50"
                                     value={variant.sellingPrice}
                                     onChange={e => {
